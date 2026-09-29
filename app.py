@@ -1,30 +1,46 @@
 """Odisha Agronomist: Flask backend.
-Run:  set GEMINI_API_KEY=<your key>   (Windows)   /   export GEMINI_API_KEY=<your key>   (Mac/Linux)
+Run:  put GROQ_API_KEY=<key> in a .env file next to app.py, then: python app.py
+      (or set it in the terminal: set GROQ_API_KEY=<key> on Windows, export on Mac/Linux)
+      (OPENAI_API_KEY or XAI_API_KEY also work)
       python app.py
 """
-import os, json, time
+import os, json, re, time
 import joblib
 import pandas as pd
 from flask import Flask, render_template, request, jsonify
 
 BASE = os.path.dirname(os.path.abspath(__file__))
+ENV_PATH = os.path.join(BASE, ".env")
+DOTENV_OK = True
+try:                                   # read keys from a .env file next to app.py (same as CampusIQ)
+    from dotenv import load_dotenv
+    load_dotenv(ENV_PATH)
+except ImportError:
+    DOTENV_OK = False
 crop_bundle = joblib.load(os.path.join(BASE, "models", "crop_model.pkl"))      # classifier + label encoder
 yield_stats = joblib.load(os.path.join(BASE, "models", "yield_stats.pkl"))     # typical yield ranges
 
-# ---------- Gemini setup ----------
+# ---------- AI provider setup: Groq (default), OpenAI or xAI, whichever key you set ----------
+client, PROVIDER, MODELS, IMPORT_ERR = None, None, [], None
 try:
-    from google import genai
-    from google.genai import types
-    GEMINI_KEY = os.environ.get("GEMINI_API_KEY")          # never hardcode the key
-    client = (genai.Client(api_key=GEMINI_KEY,
-                           http_options=types.HttpOptions(timeout=60000))   # 60 s (ms); Odia/Bengali/Telugu replies are slower
-              if GEMINI_KEY else None)
-except ImportError:
-    client = None
-
-# Primary model first, then a fallback. Verify both names work for your key.
-GEMINI_MODELS = [os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"), "gemini-3.5-flash", "gemini-flash-latest"]
-RETRYABLE = ("503", "429", "500", "UNAVAILABLE", "RESOURCE_EXHAUSTED")   # timeouts (504) skip to the next model
+    from openai import OpenAI          # Groq, xAI and OpenAI all speak the OpenAI API, so one library covers them
+    if os.environ.get("GROQ_API_KEY"):
+        PROVIDER = "groq"              # same key and model as CampusIQ
+        client = OpenAI(api_key=os.environ["GROQ_API_KEY"].strip(), base_url="https://api.groq.com/openai/v1", timeout=60, max_retries=0)
+        MODELS = [os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"), "llama-3.3-70b-versatile"]
+    elif os.environ.get("OPENAI_API_KEY"):
+        PROVIDER = "openai"
+        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"].strip(), timeout=60, max_retries=0)
+        MODELS = [os.environ.get("OPENAI_MODEL", "gpt-6-luna"), "gpt-5.6-luna", "gpt-5.4-mini"]
+    elif os.environ.get("XAI_API_KEY"):
+        PROVIDER = "xai"
+        client = OpenAI(api_key=os.environ["XAI_API_KEY"].strip(), base_url="https://api.x.ai/v1", timeout=60, max_retries=0)
+        MODELS = [os.environ.get("XAI_MODEL", "grok-4.5"), "grok-4", "grok-3"]
+except ImportError as e:
+    IMPORT_ERR = str(e)
+print(f"[setup] .env file: {'found' if os.path.exists(ENV_PATH) else 'NOT found'} at {ENV_PATH} | python-dotenv: {'ok' if DOTENV_OK else 'MISSING'} | openai library: {'MISSING' if IMPORT_ERR else 'ok'}", flush=True)
+print(f"AI provider: {PROVIDER or 'none (set GROQ_API_KEY, OPENAI_API_KEY or XAI_API_KEY)'}", flush=True)
+RETRYABLE = ("429", "500", "502", "503", "overloaded", "rate_limit")   # timeouts skip to the next model
 
 LANGUAGES = ["English", "Odia", "Hindi", "Bengali", "Telugu"]
 LIMITS = {"N": (0, 300), "P": (0, 300), "K": (0, 300), "temperature": (0, 50),
@@ -73,28 +89,37 @@ except Exception as e:
     MODEL_INFO = {"error": f"Could not load model details: {e}"}
 
 
-def call_gemini(prompt):
+def call_ai(prompt):
     """Try each model up to 3 times with backoff on overload / rate-limit errors."""
     errors = []
-    for model in GEMINI_MODELS:
+    for model in MODELS:
         for attempt in range(3):
             try:
-                r = client.models.generate_content(
-                    model=model, contents=prompt,
-                    config=types.GenerateContentConfig(response_mime_type="application/json"))
-                if not r.text:
-                    raise ValueError("Empty response from Gemini")
-                data = json.loads(r.text)
+                r = client.chat.completions.create(
+                    model=model, **({"response_format": {"type": "json_object"}} if PROVIDER == "openai" else {}),
+                    messages=[{"role": "system", "content": "You are an expert Odisha agronomist. Reply only with a JSON object."},
+                              {"role": "user", "content": prompt}])
+                text = r.choices[0].message.content
+                if not text:
+                    raise ValueError(f"Empty response (finish_reason={r.choices[0].finish_reason})")
+                cleaned = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+                try:
+                    data = json.loads(cleaned)
+                except ValueError:
+                    raise ValueError(f"Reply was not valid JSON: {text[:200]!r}")
                 if not isinstance(data, dict):
-                    raise ValueError("Gemini did not return a JSON object")
+                    raise ValueError("Reply was not a JSON object")
                 return data
             except Exception as e:
-                errors.append(f"{model}: {str(e)[:200]}")
-                print(f"[gemini] {model} attempt {attempt + 1} failed: {str(e)[:300]}", flush=True)
-                if any(c in str(e) for c in RETRYABLE) and attempt < 2:
+                msg = str(e)
+                errors.append(f"{model}: {msg[:200]}")
+                print(f"[ai] {model} attempt {attempt + 1} failed: {msg[:300]}", flush=True)
+                if any(k in msg for k in ("insufficient_quota", "invalid_api_key", "Incorrect API key")):
+                    raise RuntimeError(msg)         # billing or key problem: other models won't help
+                if any(c in msg for c in RETRYABLE) and attempt < 2:
                     time.sleep(2 ** attempt)        # 1s, 2s
                     continue
-                break                               # timeout or non-retryable: move to next model
+                break                               # timeout or non-retryable: next model
     raise RuntimeError(" | ".join(errors))
 
 
@@ -115,9 +140,13 @@ def yield_info(label, district):
 
 
 def agronomist_plan(d, crop_label, language, y):
-    """Gemini acts as an Odisha agronomist; returns sowing / fertilizer / irrigation advice."""
+    """The AI acts as an Odisha agronomist; returns sowing / fertilizer / irrigation advice."""
     if client is None:
-        return {"error": "Gemini is not configured. Set the GEMINI_API_KEY environment variable."}
+        if IMPORT_ERR:
+            return {"error": "The 'openai' package is not installed for this Python. Run: python -m pip install openai   then restart the app."}
+        if not DOTENV_OK:
+            return {"error": "The 'python-dotenv' package is not installed, so the .env file was not read. Run: python -m pip install python-dotenv   then restart."}
+        return {"error": f"GROQ_API_KEY was not found. Put GROQ_API_KEY=your_key in this file: {ENV_PATH} (file exists: {os.path.exists(ENV_PATH)}), then restart."}
     yline = (f"Typical yield in past Odisha records: {y['low']}-{y['high']} {y['unit']}." if y["available"]
              else "No Odisha yield records are available for this crop.")
     prompt = f"""You are an expert agronomist for Odisha, India, advising a farmer.
@@ -130,10 +159,15 @@ Reply ONLY as JSON with exactly these keys: "sowing_schedule", "fertilizer_manag
 Each value is short plain text (3-5 sentences or short lines). Base fertilizer advice on the N, P, K and pH given.
 Write all values in {language}. Add that doses should be confirmed with the local Krishi Vigyan Kendra."""
     try:
-        return call_gemini(prompt)
+        return call_ai(prompt)
     except Exception as e:                          # bad key, quota, network, or non-JSON reply
-        print(f"[gemini] all models failed: {e}", flush=True)
-        return {"error": "The AI advisor is busy right now (Google's servers are overloaded). Your crop matches and yield range above are still valid. Please try the advice again in a minute."}
+        print(f"[ai] all models failed: {e}", flush=True)
+        if "insufficient_quota" in str(e):
+            return {"error": "The OpenAI account has no credit left. Add billing credit at platform.openai.com, then try again."}
+        if "invalid_api_key" in str(e) or "Incorrect API key" in str(e):
+            return {"error": "The OpenAI API key is invalid. Check OPENAI_API_KEY and restart the app."}
+        return {"error": "The AI advisor is busy right now. Your crop matches and yield range above are still valid. Please try the advice again in a minute.",
+                "detail": str(e)[:500]}
 
 
 @app.get("/")
