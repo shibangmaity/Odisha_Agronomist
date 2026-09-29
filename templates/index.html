@@ -4,276 +4,1530 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Odisha Agronomist</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=Noto+Sans+Odia:wght@400;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+
 <style>
-:root{color-scheme:light;--bg:#fbf6ea;--card:#fff;--ink:#22302a;--mute:#6b766f;--line:#eadfc8;
---green:#2f6b3a;--leaf:#5aa469;--gold:#f2a900;--clay:#c8553d;--sand:#f6ecd3}
+:root{
+  color-scheme:light;
+  --bg:#fbf6ea;
+  --card:#fff;
+  --ink:#22302a;
+  --mute:#6b766f;
+  --line:#eadfc8;
+  --green:#2f6b3a;
+  --leaf:#5aa469;
+  --gold:#f2a900;
+  --clay:#c8553d;
+  --sand:#f6ecd3;
+  --sky:#fff1cc;
+  --ground:#e6f1d8;
+}
+
 *{box-sizing:border-box}
-body{margin:0;font:15px/1.55 'DM Sans','Noto Sans Odia',system-ui,sans-serif;color:var(--ink);
-background:var(--bg) radial-gradient(#eadfc8 1px,transparent 1.5px) 0 0/22px 22px}
-header{background:#fffdf7;border-bottom:1px solid var(--line);position:relative}
-header::after{content:"";display:block;height:6px;background:repeating-linear-gradient(90deg,var(--gold) 0 24px,var(--clay) 24px 48px,var(--green) 48px 72px)}
-.bar{max-width:1120px;margin:auto;padding:18px 20px;display:flex;align-items:center;gap:14px}
-.wheel{width:52px;color:var(--gold);animation:spin 40s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-h1{font:700 26px 'Fraunces',serif;margin:0;color:var(--green)}
-.sub{color:var(--mute);font-size:13px}
-nav{margin-left:auto;display:flex;gap:6px;background:var(--sand);padding:4px;border-radius:999px}
-nav button{border:0;background:none;padding:8px 16px;border-radius:999px;font:500 14px inherit;font-family:inherit;color:var(--mute);cursor:pointer}
-nav button.on{background:var(--green);color:#fff}
-main{max-width:1120px;margin:22px auto;padding:0 20px}
-.grid{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 6px 20px rgba(120,90,20,.07)}
-h2{font:700 19px 'Fraunces',serif;margin:0 0 12px}h3{font:700 15px 'DM Sans';margin:18px 0 8px}
-label{display:block;font-size:12px;color:var(--mute);margin:10px 0 3px;font-weight:500}
-input,select{width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fffdf8;font:inherit;color:var(--ink)}
-input:focus,select:focus{outline:0;border-color:var(--leaf);box-shadow:0 0 0 3px #5aa46933}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{width:100%;margin-top:16px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--leaf));color:#fff;font:700 15px inherit;font-family:inherit;cursor:pointer}
-.btn:hover{filter:brightness(1.07)}.ghost{background:none;color:var(--green);border:1.5px dashed var(--leaf);margin-top:8px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1.5px solid var(--line);background:var(--sand);border-radius:999px;padding:6px 13px;cursor:pointer;font:500 13px inherit;font-family:inherit}
-.chip.on{background:var(--gold);border-color:var(--gold);font-weight:700}
-.meter{height:10px;background:var(--sand);border-radius:9px;overflow:hidden}.meter i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--gold),var(--leaf));transition:width .8s}
-.row{display:flex;justify-content:space-between;font-size:13px;margin:8px 0 4px}
-.big{font:700 34px 'Fraunces',serif;color:var(--green)}
-.fit{display:grid;grid-template-columns:110px 1fr 110px;gap:10px;align-items:center;font-size:13px;margin:7px 0}
-.track{position:relative;height:8px;background:var(--sand);border-radius:8px}
-.band{position:absolute;top:0;bottom:0;background:#5aa46955;border-radius:8px}
-.pin{position:absolute;top:-4px;width:6px;height:16px;border-radius:3px;background:var(--green);transform:translateX(-3px)}.pin.bad{background:var(--clay)}
-.ok{color:var(--green)}.bad{color:var(--clay)}.mute{color:var(--mute)}
-.yield{display:flex;gap:10px;margin-top:8px}.yield div{flex:1;background:var(--sand);border-radius:12px;padding:10px;text-align:center}
-.yield b{display:block;font:700 20px 'Fraunces',serif}
-.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.plan section{background:#fffaf0;border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:14px}
-.plan section:nth-child(2){border-left-color:var(--clay)}.plan section:nth-child(3){border-left-color:var(--leaf)}
-.plan h4{margin:0 0 6px;font:700 15px 'Fraunces',serif}.plan p{margin:0;white-space:pre-line}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:6px}
-.stat{background:var(--sand);border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font:700 26px 'Fraunces',serif;color:var(--green)}
-.hb{display:grid;grid-template-columns:120px 1fr 52px;gap:10px;align-items:center;font-size:13px;margin:6px 0}
-.tag{display:inline-block;padding:3px 9px;border-radius:8px;font-size:12px;margin:3px;background:var(--sand)}
-.err{background:#fdece8;color:#8c2f1c;border-radius:12px;padding:12px}
-.empty{text-align:center;color:var(--mute);padding:60px 20px}.empty span{font-size:46px;display:block}
-.spin{width:34px;height:34px;border:4px solid var(--sand);border-top-color:var(--green);border-radius:50%;margin:60px auto;animation:spin .8s linear infinite}
-.hide{display:none}
-@media(max-width:820px){.grid{grid-template-columns:1fr}.bar{flex-wrap:wrap}nav{margin-left:0}.fit{grid-template-columns:90px 1fr 90px}}
-:root{--sky:#fff1cc;--ground:#e6f1d8}
-[data-theme=harvest]{--green:#8a5a00;--leaf:#d99a1c;--clay:#b5482f;--bg:#fdf3d8;--sky:#ffe7a8;--ground:#f6e2a6;--sand:#f8ecc8}
-[data-theme=sunrise]{--green:#b5482f;--leaf:#e58a5b;--gold:#f6b04a;--clay:#8c3b6e;--bg:#fff0e6;--sky:#ffd9c2;--ground:#fbe3d3;--sand:#fbe6d8}
-[data-theme=chilika]{--green:#1f6f8b;--leaf:#4fa8c0;--gold:#f2b134;--clay:#d06a4e;--bg:#eef7f8;--sky:#d6edf3;--ground:#dcefe9;--sand:#e4f0f0}
-body{background:linear-gradient(180deg,var(--sky) 0,var(--bg) 42%,var(--ground) 100%) fixed;min-height:100vh}
-.scene,.sun,.cloud,.palms{position:fixed;pointer-events:none;z-index:-1}
-.scene{left:0;right:0;bottom:0;height:36vh;min-height:220px}.scene svg{width:100%;height:100%;display:block}
-.sun{top:-70px;right:8%;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,var(--gold) 0,#fff0 68%);opacity:.5;animation:glow 6s ease-in-out infinite alternate}
-@keyframes glow{to{transform:scale(1.12);opacity:.65}}
-.cloud{top:130px;left:-220px;width:190px;height:48px;border-radius:50px;background:#fff;filter:blur(14px);opacity:.75;animation:drift 70s linear infinite}
-.cloud.b{top:240px;width:140px;animation-duration:95s;animation-delay:-40s}
-@keyframes drift{to{transform:translateX(calc(100vw + 460px))}}
-.palms{bottom:0;left:2%;width:130px;opacity:.9}.palms.r{left:auto;right:3%;width:95px}
-header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
-.sub{font:600 21px 'Caveat',cursive;color:var(--clay)}
-.card{background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-top:4px solid var(--gold)}
-.themes{margin-left:auto;display:flex;gap:8px}nav{margin-left:10px}
-.themes button{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--line);cursor:pointer;padding:0}
-.eyebrow{font:600 21px 'Caveat',cursive;color:var(--clay);display:block}
-.sec{margin:28px 0 16px}.hero p{font-size:16px;max-width:780px;margin:6px 0 0}.hero{border-top-color:var(--clay)}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-.step{background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:16px;padding:18px 16px 14px;position:relative;box-shadow:0 6px 16px rgba(120,90,20,.06)}
-.step .n{position:absolute;top:-13px;left:14px;width:28px;height:28px;border-radius:50%;background:var(--gold);color:#3b2a00;font:700 15px 'Fraunces',serif;display:grid;place-items:center}
-.step h4{margin:6px 0 4px;font:700 16px 'Fraunces',serif}.step p{margin:0;font-size:14px;color:var(--mute)}
-.step .em{font-size:26px}.note{border-top-color:var(--clay);margin-top:20px}.note li{margin:6px 0}
+
+body{
+  margin:0;
+  color:var(--ink);
+  font:15px/1.55 'DM Sans','Noto Sans Odia',system-ui,sans-serif;
+  background:linear-gradient(180deg,var(--sky),var(--bg) 42%,var(--ground)) fixed;
+  min-height:100vh;
+}
+
+header{
+  background:rgba(255,253,247,.92);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(8px);
+}
+
+header:after{
+  content:"";
+  display:block;
+  height:6px;
+  background:repeating-linear-gradient(
+    90deg,
+    var(--gold) 0 24px,
+    var(--clay) 24px 48px,
+    var(--green) 48px 72px
+  );
+}
+
+.bar{
+  max-width:1120px;
+  margin:auto;
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.wheel{
+  width:52px;
+  color:var(--gold);
+  animation:spin 40s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+h1{
+  margin:0;
+  color:var(--green);
+  font:700 26px 'Fraunces',serif;
+}
+
+h2{
+  margin:0 0 12px;
+  font:700 20px 'Fraunces',serif;
+}
+
+h3{
+  margin:18px 0 8px;
+  font-size:15px;
+}
+
+h4{
+  margin:0 0 7px;
+  font:700 15px 'Fraunces',serif;
+}
+
+.sub{
+  color:var(--clay);
+  font:600 21px 'Caveat',cursive;
+}
+
+nav{
+  margin-left:auto;
+  display:flex;
+  gap:5px;
+  padding:4px;
+  border-radius:999px;
+  background:#e5f0ef;
+}
+
+nav button{
+  border:0;
+  padding:8px 15px;
+  border-radius:999px;
+  color:var(--mute);
+  background:transparent;
+  cursor:pointer;
+  font:500 14px 'DM Sans',sans-serif;
+}
+
+nav button.on{
+  color:#fff;
+  background:var(--green);
+}
+
+.themes{
+  display:flex;
+  gap:8px;
+  margin-left:auto;
+}
+
+.themes button{
+  width:22px;
+  height:22px;
+  padding:0;
+  border:2px solid #fff;
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 0 0 1.5px var(--line);
+}
+
+main{
+  max-width:1120px;
+  margin:22px auto;
+  padding:0 20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:20px;
+  align-items:start;
+}
+
+.card{
+  padding:20px;
+  border:1px solid var(--line);
+  border-top:4px solid var(--gold);
+  border-radius:18px;
+  background:rgba(255,255,255,.93);
+  box-shadow:0 6px 20px rgba(120,90,20,.07);
+  backdrop-filter:blur(6px);
+}
+
+label{
+  display:block;
+  margin:10px 0 3px;
+  color:var(--mute);
+  font-size:12px;
+  font-weight:500;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:10px 11px;
+  border:1.5px solid var(--line);
+  border-radius:10px;
+  background:#fffdf8;
+  color:var(--ink);
+  font:inherit;
+}
+
+textarea{
+  min-height:78px;
+  resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  outline:0;
+  border-color:var(--leaf);
+  box-shadow:0 0 0 3px #5aa46933;
+}
+
+.two{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.btn{
+  width:100%;
+  margin-top:16px;
+  padding:12px;
+  border:0;
+  border-radius:12px;
+  color:#fff;
+  background:linear-gradient(135deg,var(--green),var(--leaf));
+  cursor:pointer;
+  font:700 15px 'DM Sans',sans-serif;
+}
+
+.btn:hover{
+  filter:brightness(1.07);
+}
+
+.ghost{
+  margin-top:8px;
+  border:1.5px dashed var(--leaf);
+  color:var(--green);
+  background:transparent;
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.chip{
+  padding:6px 13px;
+  border:1.5px solid var(--line);
+  border-radius:999px;
+  background:var(--sand);
+  color:var(--ink);
+  cursor:pointer;
+  font:500 13px 'DM Sans',sans-serif;
+}
+
+.chip.on{
+  border-color:var(--gold);
+  background:var(--gold);
+  font-weight:700;
+}
+
+.meter{
+  height:10px;
+  overflow:hidden;
+  border-radius:9px;
+  background:var(--sand);
+}
+
+.meter i{
+  display:block;
+  height:100%;
+  border-radius:9px;
+  background:linear-gradient(90deg,var(--gold),var(--leaf));
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin:8px 0 4px;
+  font-size:13px;
+}
+
+.big{
+  color:var(--green);
+  font:700 34px 'Fraunces',serif;
+}
+
+.fit{
+  display:grid;
+  grid-template-columns:100px 1fr 105px;
+  gap:10px;
+  align-items:center;
+  margin:7px 0;
+  font-size:13px;
+}
+
+.track{
+  position:relative;
+  height:8px;
+  border-radius:8px;
+  background:var(--sand);
+}
+
+.band{
+  position:absolute;
+  top:0;
+  bottom:0;
+  border-radius:8px;
+  background:#5aa46955;
+}
+
+.pin{
+  position:absolute;
+  top:-4px;
+  width:6px;
+  height:16px;
+  border-radius:3px;
+  background:var(--green);
+  transform:translateX(-3px);
+}
+
+.pin.bad{
+  background:var(--clay);
+}
+
+.ok{color:var(--green)}
+.bad{color:var(--clay)}
+.mute{color:var(--mute)}
+
+.yield{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+
+.yield div{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  background:var(--sand);
+  text-align:center;
+}
+
+.yield b{
+  display:block;
+  color:var(--green);
+  font:700 20px 'Fraunces',serif;
+}
+
+.plan,
+.health-grid,
+.steps{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;
+}
+
+.plan section,
+.health-grid section{
+  padding:14px;
+  border:1px solid var(--line);
+  border-left:5px solid var(--gold);
+  border-radius:12px;
+  background:#fffaf0;
+}
+
+.plan section:nth-child(2),
+.health-grid section:nth-child(2){
+  border-left-color:var(--clay);
+}
+
+.plan section:nth-child(3),
+.health-grid section:nth-child(3){
+  border-left-color:var(--leaf);
+}
+
+.plan p,
+.health-grid p{
+  margin:0;
+  white-space:pre-line;
+}
+
+.health-panel{
+  margin-top:20px;
+  border-top-color:var(--clay);
+}
+
+.health-intro{
+  margin-top:12px;
+  padding:11px;
+  border-radius:10px;
+  background:#fffaf0;
+  color:var(--mute);
+  font-size:12px;
+}
+
+.assessment{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  background:var(--sand);
+  color:var(--green);
+  font-weight:700;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:10px;
+}
+
+.stat{
+  padding:12px;
+  border-radius:14px;
+  background:var(--sand);
+  text-align:center;
+}
+
+.stat b{
+  display:block;
+  color:var(--green);
+  font:700 25px 'Fraunces',serif;
+}
+
+.hb{
+  display:grid;
+  grid-template-columns:120px 1fr 55px;
+  gap:10px;
+  align-items:center;
+  margin:6px 0;
+  font-size:13px;
+}
+
+.tag{
+  display:inline-block;
+  margin:3px;
+  padding:3px 9px;
+  border-radius:8px;
+  background:var(--sand);
+  font-size:12px;
+}
+
+.err{
+  padding:12px;
+  border-radius:12px;
+  background:#fdece8;
+  color:#8c2f1c;
+}
+
+.empty{
+  padding:60px 20px;
+  color:var(--mute);
+  text-align:center;
+}
+
+.empty span{
+  display:block;
+  font-size:46px;
+}
+
+.spin{
+  width:34px;
+  height:34px;
+  margin:60px auto;
+  border:4px solid var(--sand);
+  border-top-color:var(--green);
+  border-radius:50%;
+  animation:spin.8s linear infinite;
+}
+
+.note{
+  margin-top:18px;
+  border-top-color:var(--clay);
+}
+
+.note p{
+  margin-bottom:0;
+}
+
+.hero{
+  border-top-color:var(--clay);
+}
+
+.sec{
+  margin:28px 0 16px;
+}
+
+.step{
+  position:relative;
+  padding:18px 16px 14px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,255,255,.93);
+}
+
+.step.n{
+  display:grid;
+  position:absolute;
+  top:-13px;
+  left:14px;
+  width:28px;
+  height:28px;
+  place-items:center;
+  border-radius:50%;
+  background:var(--gold);
+  color:#3b2a00;
+  font:700 15px 'Fraunces',serif;
+}
+
+.step h4{
+  margin-top:6px;
+}
+
+.step p{
+  margin:0;
+  color:var(--mute);
+  font-size:14px;
+}
+
+.hide{
+  display:none;
+}
+
+@media(max-width:820px){
+.grid{
+    grid-template-columns:1fr;
+  }
+
+.bar{
+    flex-wrap:wrap;
+  }
+
+.themes,
+  nav{
+    margin-left:0;
+  }
+
+.fit{
+    grid-template-columns:85px 1fr 90px;
+  }
+
+.health-grid,
+.plan{
+    grid-template-columns:1fr;
+  }
+}
+
+[data-theme="harvest"]{
+  --green:#8a5a00;
+  --leaf:#d99a1c;
+  --clay:#b5482f;
+  --bg:#fdf3d8;
+  --sky:#ffe7a8;
+  --ground:#f6e2a6;
+  --sand:#f8ecc8;
+}
+
+[data-theme="sunrise"]{
+  --green:#b5482f;
+  --leaf:#e58a5b;
+  --gold:#f6b04a;
+  --clay:#8c3b6e;
+  --bg:#fff0e6;
+  --sky:#ffd9c2;
+  --ground:#fbe3d3;
+  --sand:#fbe6d8;
+}
+
+[data-theme="chilika"]{
+  --green:#1f6f8b;
+  --leaf:#4fa8c0;
+  --gold:#f2b134;
+  --clay:#d06a4e;
+  --bg:#eef7f8;
+  --sky:#d6edf3;
+  --ground:#dcefe9;
+  --sand:#e4f0f0;
+}
 </style>
 </head>
+
 <body>
-<div class="sun"></div><div class="cloud"></div><div class="cloud b"></div>
-<div class="scene" aria-hidden="true"><svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-<path d="M0 200 C240 120 420 240 720 180 S1200 120 1440 190 V320 H0Z" fill="var(--leaf)" opacity=".2"/>
-<path d="M0 240 C300 170 520 290 820 220 S1250 200 1440 250 V320 H0Z" fill="var(--green)" opacity=".17"/>
-<path d="M0 285 C360 240 640 310 960 270 S1300 265 1440 290 V320 H0Z" fill="var(--gold)" opacity=".3"/></svg></div>
-<svg class="palms" viewBox="-40 -110 100 120" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"><path d="M0 10C6-30 4-60 12-90M12-90q-30-5-40 20M12-90q30-5 40 20M12-90q-20-25-45-15M12-90q20-25 45-15M12-90v-18"/></svg>
-<svg class="palms r" viewBox="-40 -110 100 120" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"><path d="M0 10C-6-30-4-60-12-90M-12-90q30-5 40 20M-12-90q-30-5-40 20M-12-90q20-25 45-15M-12-90q-20-25-45-15M-12-90v-18"/></svg>
-<header><div class="bar">
-<svg class="wheel" viewBox="-50 -50 100 100" fill="none" stroke="currentColor" stroke-width="3"><circle r="44"/><circle r="8"/><circle r="30" stroke-dasharray="2 5"/><path d="M-44 0H44M0-44V44M-31-31L31 31M-31 31L31-31"/></svg>
-<div><h1>Odisha Agronomist</h1><div class="sub">Crop advice from soil, weather and Odisha's yield records</div></div>
-<div class="themes"><button data-t="monsoon" title="Monsoon (Kharif)" style="background:#2f6b3a"></button><button data-t="harvest" title="Harvest (Rabi)" style="background:#d99a1c"></button><button data-t="sunrise" title="Sunrise" style="background:#e58a5b"></button><button data-t="chilika" title="Chilika lake" style="background:#4fa8c0"></button></div>
-<nav><button class="on" data-tab="advisor">🌾 Advisor</button><button data-tab="model">🧠 Model &amp; Data</button><button data-tab="about">📖 About</button></nav>
-</div></header>
+
+<header>
+  <div class="bar">
+
+    <svg class="wheel" viewBox="-50 -50 100 100" fill="none"
+         stroke="currentColor" stroke-width="3">
+      <circle r="44"/>
+      <circle r="8"/>
+      <circle r="30" stroke-dasharray="2 5"/>
+      <path d="M-44 0H44M0-44V44M-31-31L31 31M-31 31L31-31"/>
+    </svg>
+
+    <div>
+      <h1>Odisha Agronomist</h1>
+      <div class="sub">
+        Crop advice from soil, weather and Odisha's yield records
+      </div>
+    </div>
+
+    <div class="themes">
+      <button data-t="monsoon" title="Monsoon" style="background:#2f6b3a"></button>
+      <button data-t="harvest" title="Harvest" style="background:#d99a1c"></button>
+      <button data-t="sunrise" title="Sunrise" style="background:#e58a5b"></button>
+      <button data-t="chilika" title="Chilika" style="background:#4fa8c0"></button>
+    </div>
+
+    <nav>
+      <button class="on" data-tab="advisor">🌾 Advisor</button>
+      <button data-tab="model">🧠 Model &amp; Data</button>
+      <button data-tab="about">📖 About</button>
+    </nav>
+
+  </div>
+</header>
 
 <main>
-<div id="advisor" class="grid">
-  <div class="card">
-    <h2>Your field</h2>
-    <label>District</label>
-    <select id="district">{% for d in districts %}<option value="{{ d }}">{{ d.title() }}</option>{% endfor %}</select>
-    <label>Crop to check (optional)</label>
-    <select id="crop"><option value="">Best match (auto)</option>{% for c in crops %}<option value="{{ c }}">{{ c.title() }}</option>{% endfor %}</select>
-    <div class="two" id="fields"></div>
-    <label>Advice language</label>
-    <select id="language">{% for l in languages %}<option>{{ l }}</option>{% endfor %}</select>
-    <button class="btn" id="go">Get advice</button>
-    <button class="btn ghost" id="sample" type="button">Try sample values</button>
+
+  <!-- ADVISOR -->
+  <div id="advisor" class="grid">
+
+    <div class="card">
+
+      <h2>Your field</h2>
+
+      <label>District</label>
+      <select id="district">
+        {% for d in districts %}
+        <option value="{{ d }}">{{ d.title() }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Crop to check</label>
+      <select id="crop">
+        <option value="">Best match automatically</option>
+        {% for c in crops %}
+        <option value="{{ c }}">{{ c.title() }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Crop name for health advice</label>
+      <input id="health_crop"
+             type="text"
+             placeholder="Example: Rice, Tomato, Chilli">
+
+      <label>Crop growth stage</label>
+      <select id="growth_stage">
+        <option value="">Not specified</option>
+        <option value="Seedling">Seedling</option>
+        <option value="Vegetative growth">Vegetative growth</option>
+        <option value="Flowering">Flowering</option>
+        <option value="Fruiting">Fruiting</option>
+        <option value="Harvest stage">Harvest stage</option>
+      </select>
+
+      <label>Disease or crop problem</label>
+      <input id="disease"
+             type="text"
+             placeholder="Example: blast, wilt, leaf curl, insects">
+
+      <label>Symptoms noticed</label>
+      <textarea id="symptoms"
+                placeholder="Example: brown spots, yellow leaves, curling or insects"></textarea>
+
+      <div class="health-intro">
+        To use Crop Health Advisor, enter a crop name and either a disease/problem
+        or symptoms. The AI will provide treatment, cultivation, prevention and
+        general disease-history guidance.
+      </div>
+
+      <div class="two" id="fields"></div>
+
+      <label>Advice language</label>
+      <select id="language">
+        {% for l in languages %}
+        <option>{{ l }}</option>
+        {% endfor %}
+      </select>
+
+      <button class="btn" id="go" type="button">
+        🌾 Get crop advice
+      </button>
+
+      <button class="btn ghost" id="sample" type="button">
+        Try sample values
+      </button>
+
+      <button class="btn" id="healthBtn" type="button">
+        🩺 Check crop health
+      </button>
+
+    </div>
+
+    <div class="card" id="out">
+      <div class="empty">
+        <span>🌱</span>
+        Enter your soil and weather values, then tap
+        <b>Get crop advice</b>.
+      </div>
+    </div>
+
   </div>
-  <div class="card" id="out"><div class="empty"><span>🌱</span>Enter your soil and weather values, then tap <b>Get advice</b>.</div></div>
-</div>
 
-<div id="model" class="card hide"><div class="spin"></div></div>
-
-<div id="about" class="hide">
-  <div class="card hero"><span class="eyebrow">About the app</span><h2>What is Odisha Agronomist?</h2>
-    <p>Odisha Agronomist is a crop advisory app for farmers in Odisha. You describe your field — district, soil nutrients (N, P, K), soil pH and local weather — and it tells you which crops suit those conditions, what yields farmers in Odisha have typically seen, and a practical plan for sowing, fertilizer and irrigation, written in your own language.</p></div>
-
-  <h2 class="sec">What happens when you tap “Get advice”</h2>
-  <div class="steps">
-    <div class="step"><div class="n">1</div><h4>You describe your field</h4><p>Pick your district and enter nitrogen, phosphorus, potassium, pH, temperature, humidity and rainfall. Optionally choose a crop you already have in mind.</p></div>
-    <div class="step"><div class="n">2</div><h4>The ML model scores 22 crops</h4><p>A trained classifier compares your numbers with what each crop usually needs and gives every crop a suitability score. It reaches about 99% accuracy on test data it never saw.</p></div>
-    <div class="step"><div class="n">3</div><h4>Odisha's yield records are checked</h4><p>For crops with local data, you see the typical yield range from historical Odisha records: your district if there is enough data, otherwise all of Odisha.</p></div>
-    <div class="step"><div class="n">4</div><h4>An AI agronomist writes your plan</h4><p>A large language model turns your numbers, the chosen crop and the yield range into a sowing, fertilizer and irrigation plan in English, Odia, Hindi, Bengali or Telugu.</p></div>
+  <!-- MODEL -->
+  <div id="model" class="card hide">
+    <div class="spin"></div>
   </div>
 
-  <h2 class="sec">What you get</h2>
-  <div class="steps">
-    <div class="step"><div class="em">🎯</div><h4>Top 3 crop matches</h4><p>Ranked by suitability. Tap any one to get advice for that crop.</p></div>
-    <div class="step"><div class="em">📏</div><h4>Field-fit check</h4><p>See which of your inputs sit inside, below or above the crop's usual range.</p></div>
-    <div class="step"><div class="em">📊</div><h4>Typical yield</h4><p>Low, typical and high yield with the number of records behind it.</p></div>
-    <div class="step"><div class="em">🗓️</div><h4>Action plan</h4><p>When to sow, how to feed the soil and how to water, in your language.</p></div>
+  <!-- ABOUT -->
+  <div id="about" class="hide">
+
+    <div class="card hero">
+      <h2>What is Odisha Agronomist?</h2>
+      <p>
+        Odisha Agronomist is a crop advisory application for farmers in Odisha.
+        It uses soil and weather values to recommend suitable crops and uses AI
+        to provide cultivation, irrigation, fertilizer and crop-health guidance.
+      </p>
+    </div>
+
+    <h2 class="sec">Available features</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <h4>Crop recommendation</h4>
+        <p>
+          The trained ML model recommends suitable crops from soil and weather
+          values.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="n">2</div>
+        <h4>AI cultivation advice</h4>
+        <p>
+          The AI provides sowing, fertilizer and irrigation suggestions for the
+          selected crop.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="n">3</div>
+        <h4>Crop health advisor</h4>
+        <p>
+          Farmers can type a district, crop, disease/problem, symptoms and growth
+          stage to receive crop-health guidance.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="n">4</div>
+        <h4>Area disease history</h4>
+        <p>
+          The AI explains general diseases and pests commonly associated with the
+          crop and selected Odisha district.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:22px">
+      <h2>🩺 Crop Health Advisor</h2>
+      <p>
+        The Crop Health Advisor provides a possible assessment, symptoms to
+        check, treatment and management, medicine guidance, cultivation method,
+        prevention and general disease-history information.
+      </p>
+      <p class="mute">
+        This is AI-generated guidance, not a confirmed diagnosis or verified
+        year-by-year disease-surveillance record. Confirm chemical treatment with
+        a local Krishi Vigyan Kendra, agriculture officer or plant pathologist.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:22px">
+      <h2>Data and technology</h2>
+      <p class="mute">
+        The crop recommendation model uses soil and weather features. Yield
+        information comes from the existing Odisha yield records. Crop-health
+        responses are generated by an AI model and do not use a separate disease
+        CSV or disease JSON database.
+      </p>
+
+      <span class="tag">Python</span>
+      <span class="tag">Flask</span>
+      <span class="tag">pandas</span>
+      <span class="tag">scikit-learn</span>
+      <span class="tag">Random Forest</span>
+      <span class="tag">XGBoost</span>
+      <span class="tag">AI Agronomist</span>
+    </div>
+
+    <div class="card note">
+      <h2>Good to know</h2>
+      <ul>
+        <li>Crop scores are guidance, not a guarantee.</li>
+        <li>AI crop-health output is not a confirmed diagnosis.</li>
+        <li>Do not mix pesticides.</li>
+        <li>Always follow the product label.</li>
+        <li>Confirm treatment with your local KVK or agriculture officer.</li>
+      </ul>
+    </div>
+
   </div>
 
-  <div class="card" style="margin-top:22px"><h2>Data and technology</h2>
-    <p class="mute" style="margin-top:0">Trained on the Crop Recommendation dataset (2,200 rows, 22 crops, 7 inputs). Yield ranges come from the Indian crop production dataset, filtered to Odisha (43 crops).</p>
-    <span class="tag">Python</span><span class="tag">Flask</span><span class="tag">pandas</span><span class="tag">scikit-learn</span><span class="tag">Random Forest</span><span class="tag">XGBoost</span><span class="tag">OpenAI-compatible LLM API</span></div>
-
-  <div class="card" style="margin-top:22px"><h2>Team Members</h2>
-    <span class="tag">Shibang Maity</span><span class="tag">Priyanshu Sekhar Bhuyan</span><span class="tag">Roshan Panda</span><span class="tag">M.Tanisha</span><span class="tag">Rishav Kumar Shrivastava</span><span class="tag">Divyansh Singh</span></div>
-
-  <div class="card note"><h2>Good to know</h2><ul>
-    <li>Crop scores use soil and weather values only. Your district is used for the yield range and the AI's local advice.</li>
-    <li>The model learned from a general crop dataset, so treat scores as guidance, not a guarantee.</li>
-    <li>Some crops, like mango and coconut, have no Odisha yield records, so no yield range is shown for them.</li>
-    <li>Yield values in the source data mix units, so the app shows a range from the data instead of a prediction.</li>
-    <li>Always confirm fertilizer doses with your local Krishi Vigyan Kendra (KVK) before buying inputs.</li></ul></div>
-</div>
 </main>
 
-{% raw %}
 <script>
-const $ = s => document.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const $ = selector => document.querySelector(selector);
+
+function esc(value){
+  return String(value?? "").replace(
+    /[&<>"]/g,
+    character => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;"
+    }[character])
+  );
+}
+
+function cap(value){
+  value = String(value || "");
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 const F = [
-  {k:"N", l:"Nitrogen (N)", u:"kg/ha", min:0, max:300, s:1}, {k:"P", l:"Phosphorus (P)", u:"kg/ha", min:0, max:300, s:1},
-  {k:"K", l:"Potassium (K)", u:"kg/ha", min:0, max:300, s:1}, {k:"ph", l:"Soil pH", u:"", min:3, max:10, s:.1},
-  {k:"temperature", l:"Temperature", u:"°C", min:0, max:50, s:.1}, {k:"humidity", l:"Humidity", u:"%", min:0, max:100, s:1},
-  {k:"rainfall", l:"Rainfall", u:"mm", min:0, max:500, s:1}];
-const L = Object.fromEntries(F.map(f => [f.k, f]));
-$("#fields").innerHTML = F.map(f => `<div><label>${f.l}${f.u ? " ("+f.u+")" : ""}</label><input id="${f.k}" type="number" min="${f.min}" max="${f.max}" step="${f.s}"></div>`).join("");
-
-// Sample values, in the same order as F: N, P, K, pH, temperature, humidity, rainfall
-const SAMPLES = [
-  {name:"Rice",     v:[90, 42, 43, 6.5, 21, 82, 200]},
-  {name:"Maize",    v:[80, 45, 20, 6.2, 22, 65, 85]},
-  {name:"Chickpea", v:[40, 68, 80, 7.3, 18, 17, 80]},
-  {name:"Jute",     v:[80, 46, 40, 6.7, 25, 80, 175]},
-  {name:"Cotton",   v:[120, 40, 20, 7.0, 24, 80, 80]},
-  {name:"Banana",   v:[100, 80, 50, 6.0, 27, 80, 105]},
-  {name:"Lentil",   v:[20, 68, 20, 6.9, 25, 65, 45]},
-  {name:"Coconut",  v:[20, 17, 30, 6.0, 27, 95, 175]},
+  {
+    k:"N",
+    l:"Nitrogen (N)",
+    u:"kg/ha",
+    min:0,
+    max:300,
+    s:1
+  },
+  {
+    k:"P",
+    l:"Phosphorus (P)",
+    u:"kg/ha",
+    min:0,
+    max:300,
+    s:1
+  },
+  {
+    k:"K",
+    l:"Potassium (K)",
+    u:"kg/ha",
+    min:0,
+    max:300,
+    s:1
+  },
+  {
+    k:"ph",
+    l:"Soil pH",
+    u:"",
+    min:3,
+    max:10,
+    s:.1
+  },
+  {
+    k:"temperature",
+    l:"Temperature",
+    u:"°C",
+    min:0,
+    max:50,
+    s:.1
+  },
+  {
+    k:"humidity",
+    l:"Humidity",
+    u:"%",
+    min:0,
+    max:100,
+    s:1
+  },
+  {
+    k:"rainfall",
+    l:"Rainfall",
+    u:"mm",
+    min:0,
+    max:500,
+    s:1
+  }
 ];
-let lastSample = -1;
-$("#sample").onclick = () => {
-  // pick a random crop profile, never the same one twice in a row
-  let i;
-  do { i = Math.floor(Math.random() * SAMPLES.length); } while (i === lastSample && SAMPLES.length > 1);
-  lastSample = i;
 
-  // add up to +/-10% random variation so the numbers are different every click
-  SAMPLES[i].v.forEach((base, j) => {
-    const f = F[j];
-    let val = base * (1 + (Math.random() * 2 - 1) * 0.10);
-    val = Math.max(f.min, Math.min(f.max, val));               // stay inside the allowed limits
-    $("#" + f.k).value = f.s < 1 ? val.toFixed(1) : Math.round(val);
+$("#fields").innerHTML = F.map(field => `
+  <div>
+    <label>
+      ${field.l}${field.u? ` (${field.u})`: ""}
+    </label>
+    <input
+      id="${field.k}"
+      type="number"
+      min="${field.min}"
+      max="${field.max}"
+      step="${field.s}">
+  </div>
+`).join("");
+
+
+const SAMPLES = [
+  {
+    name:"Rice",
+    values:[90,42,43,6.5,21,82,200]
+  },
+  {
+    name:"Maize",
+    values:[80,45,20,6.2,22,65,85]
+  },
+  {
+    name:"Chickpea",
+    values:[40,68,80,7.3,18,17,80]
+  },
+  {
+    name:"Cotton",
+    values:[120,40,20,7.0,24,80,80]
+  },
+  {
+    name:"Banana",
+    values:[100,80,50,6.0,27,80,105]
+  }
+];
+
+let lastSample = -1;
+
+$("#sample").onclick = () => {
+  let index;
+
+  do {
+    index = Math.floor(Math.random() * SAMPLES.length);
+  } while(index === lastSample && SAMPLES.length > 1);
+
+  lastSample = index;
+
+  const sample = SAMPLES[index];
+
+  sample.values.forEach((base, position) => {
+    const field = F[position];
+
+    let value = base * (
+      1 + (Math.random() * 2 - 1) *.10
+    );
+
+    value = Math.max(
+      field.min,
+      Math.min(field.max, value)
+    );
+
+    $("#" + field.k).value =
+      field.s < 1
+? value.toFixed(1)
+: Math.round(value);
   });
 
-  // random district too (delete these two lines to keep your chosen district)
-  const opts = $("#district").options;
-  $("#district").selectedIndex = Math.floor(Math.random() * opts.length);
-  $("#crop").value = "";                                       // keep "Best match (auto)"
+  $("#crop").value = "";
+  $("#health_crop").value = sample.name;
 };
-document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  $("#advisor").classList.toggle("hide", b.dataset.tab !== "advisor");
-  $("#model").classList.toggle("hide", b.dataset.tab !== "model");
-  $("#about").classList.toggle("hide", b.dataset.tab !== "about");
-  if (b.dataset.tab === "model") loadModel();
+
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.onclick = () => {
+    document.querySelectorAll("nav button")
+.forEach(item => item.classList.toggle(
+        "on",
+        item === button
+      ));
+
+    $("#advisor").classList.toggle(
+      "hide",
+      button.dataset.tab!== "advisor"
+    );
+
+    $("#model").classList.toggle(
+      "hide",
+      button.dataset.tab!== "model"
+    );
+
+    $("#about").classList.toggle(
+      "hide",
+      button.dataset.tab!== "about"
+    );
+
+    if(button.dataset.tab === "model"){
+      loadModel();
+    }
+  };
 });
 
-async function run(crop) {
-  const body = {district: $("#district").value, crop: crop ?? $("#crop").value, language: $("#language").value};
-  F.forEach(f => body[f.k] = $("#"+f.k).value);
-  $("#out").innerHTML = '<div class="spin"></div>';
-  try {
-    const r = await fetch("/api/recommend", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || "Something went wrong");
-    render(d, body);
-  } catch (e) { $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+
+async function run(crop){
+  const body = {
+    district: $("#district").value,
+    crop: crop?? $("#crop").value,
+    language: $("#language").value
+  };
+
+  F.forEach(field => {
+    body[field.k] = $("#" + field.k).value;
+  });
+
+  $("#out").innerHTML = `
+    <div class="spin"></div>
+    <p class="mute" style="text-align:center">
+      Preparing crop recommendation...
+    </p>
+  `;
+
+  try{
+    const response = await fetch(
+      "/api/recommend",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(body)
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+      throw new Error(
+        data.error || "Something went wrong."
+      );
+    }
+
+    renderRecommendation(data, body);
+
+  }catch(error){
+    $("#out").innerHTML = `
+      <div class="err">${esc(error.message)}</div>
+    `;
+  }
 }
+
 $("#go").onclick = () => run();
 
-function fit(profile, body) {
-  return F.map(f => {
-    const [lo, mid, hi] = profile[f.k], v = +body[f.k], span = f.max - f.min, pct = x => Math.max(0, Math.min(100, (x - f.min) / span * 100));
-    const st = v < lo ? ["below typical", "bad"] : v > hi ? ["above typical", "bad"] : ["in range", "ok"];
-    return `<div class="fit"><span>${f.l.split(" ")[0]}</span><div class="track"><div class="band" style="left:${pct(lo)}%;width:${pct(hi)-pct(lo)}%"></div><div class="pin ${st[1]}" style="left:${pct(v)}%"></div></div><span class="${st[1]}">${st[0]}</span></div>`;
+
+function fit(profile, body){
+  return F.map(field => {
+    const values = profile[field.k];
+
+    if(!values){
+      return "";
+    }
+
+    const [low, middle, high] = values;
+    const value = Number(body[field.k]);
+    const span = field.max - field.min;
+
+    const percent = number => Math.max(
+      0,
+      Math.min(
+        100,
+        ((number - field.min) / span) * 100
+      )
+    );
+
+    const status =
+      value < low
+? ["below typical","bad"]
+: value > high
+? ["above typical","bad"]
+: ["in range","ok"];
+
+    return `
+      <div class="fit">
+        <span>${esc(field.l.split(" ")[0])}</span>
+        <div class="track">
+          <div
+            class="band"
+            style="
+              left:${percent(low)}%;
+              width:${percent(high) - percent(low)}%;
+            ">
+          </div>
+          <div
+            class="pin ${status[1]}"
+            style="left:${percent(value)}%">
+          </div>
+        </div>
+        <span class="${status[1]}">
+          ${status[0]}
+        </span>
+      </div>
+    `;
   }).join("");
 }
 
-function render(d, body) {
-  const y = d.yield_info, p = d.plan || {};
-  const chips = d.top.map(t => `<button class="chip ${t.crop === d.chosen ? "on" : ""}" onclick="run('${esc(t.crop)}')">${cap(esc(t.crop))} · ${Math.round(t.score*100)}%</button>`).join("");
-  const yhtml = y.available
-    ? `<div class="yield"><div><b>${y.low}</b>low</div><div><b>${y.typical}</b>typical</div><div><b>${y.high}</b>high</div></div>
-       <p class="mute" style="font-size:12px">${esc(y.unit)} · ${y.scope === "district" ? "this district" : "all Odisha"} · ${y.records} records (${y.years[0]}–${y.years[1]}) · ${y.confidence} confidence</p>`
-    : `<p class="mute">No Odisha yield records exist for this crop.</p>`;
-  const advice = p.error ? `<div class="err">${esc(p.error)}<br><button class="chip" style="margin-top:10px" onclick="run('${esc(d.chosen)}')">↻ Try advice again</button>${p.detail ? `<div class="mute" style="font-size:11px;margin-top:10px;word-break:break-word">Details: ${esc(p.detail)}</div>` : ""}</div>` :
-    `<div class="plan"><section><h4>🌱 Sowing schedule</h4><p>${esc(p.sowing_schedule)}</p></section>
-     <section><h4>🧪 Fertilizer management</h4><p>${esc(p.fertilizer_management)}</p></section>
-     <section><h4>💧 Irrigation strategy</h4><p>${esc(p.irrigation_strategy)}</p></section></div>`;
-  $("#out").innerHTML = `<h2>Best matches for your soil and weather</h2><div class="chips">${chips}</div>
-    <div class="row"><b>${cap(esc(d.chosen))}</b><span>suitability</span></div>
-    <div class="big">${Math.round(d.chosen_score*100)}%</div><div class="meter"><i style="width:${d.chosen_score*100}%"></i></div>
-    ${d.profile ? `<h3>Your field vs what ${esc(d.chosen)} usually needs</h3>${fit(d.profile, body)}<p class="mute" style="font-size:12px">Green band = typical range in the training data.</p>` : ""}
-    <h3>Typical yield</h3>${yhtml}<h3>Action plan</h3>${advice}`;
+
+function renderRecommendation(data, body){
+  const yieldData = data.yield_info || {};
+  const plan = data.plan || {};
+
+  const chips = (data.top || []).map(item => `
+    <button
+      class="chip ${item.crop === data.chosen? "on": ""}"
+      data-crop="${esc(item.crop)}">
+      ${cap(esc(item.crop))} · ${Math.round(item.score * 100)}%
+    </button>
+  `).join("");
+
+  const yieldHtml = yieldData.available
+? `
+      <div class="yield">
+        <div>
+          <b>${esc(yieldData.low)}</b>
+          low
+        </div>
+        <div>
+          <b>${esc(yieldData.typical)}</b>
+          typical
+        </div>
+        <div>
+          <b>${esc(yieldData.high)}</b>
+          high
+        </div>
+      </div>
+
+      <p class="mute" style="font-size:12px">
+        ${esc(yieldData.unit)} ·
+        ${yieldData.scope === "district"? "this district": "all Odisha"} ·
+        ${esc(yieldData.records)} records
+      </p>
+    `
+: `
+      <p class="mute">
+        No Odisha yield records exist for this crop.
+      </p>
+    `;
+
+  const advice = plan.error
+? `
+      <div class="err">
+        ${esc(plan.error)}
+      </div>
+    `
+: `
+      <div class="plan">
+        <section>
+          <h4>🌱 Sowing schedule</h4>
+          <p>${esc(plan.sowing_schedule)}</p>
+        </section>
+
+        <section>
+          <h4>🧪 Fertilizer management</h4>
+          <p>${esc(plan.fertilizer_management)}</p>
+        </section>
+
+        <section>
+          <h4>💧 Irrigation strategy</h4>
+          <p>${esc(plan.irrigation_strategy)}</p>
+        </section>
+      </div>
+    `;
+
+  $("#out").innerHTML = `
+    <h2>Best matches for your soil and weather</h2>
+
+    <div class="chips">
+      ${chips}
+    </div>
+
+    <div class="row">
+      <b>${cap(esc(data.chosen))}</b>
+      <span>suitability</span>
+    </div>
+
+    <div class="big">
+      ${Math.round(data.chosen_score * 100)}%
+    </div>
+
+    <div class="meter">
+      <i style="width:${data.chosen_score * 100}%"></i>
+    </div>
+
+    ${
+      data.profile
+? `
+          <h3>
+            Your field vs what ${esc(data.chosen)} usually needs
+          </h3>
+          ${fit(data.profile, body)}
+          <p class="mute" style="font-size:12px">
+            Green band = typical range in the training data.
+          </p>
+        `
+: ""
+    }
+
+    <h3>Typical yield</h3>
+    ${yieldHtml}
+
+    <h3>Action plan</h3>
+    ${advice}
+  `;
+
+  document.querySelectorAll("[data-crop]").forEach(button => {
+    button.onclick = () => run(button.dataset.crop);
+  });
 }
 
-function setTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem("theme", t); } catch (e) {} }
-document.querySelectorAll(".themes button").forEach(b => b.onclick = () => setTheme(b.dataset.t));
-let saved = "monsoon"; try { saved = localStorage.getItem("theme") || "monsoon"; } catch (e) {}
-setTheme(saved);
 
-let loaded = false;
-async function loadModel() {
-  if (loaded) return;
-  try {
-    const m = await (await fetch("/api/model")).json();
-    if (m.error) throw new Error(m.error);
-    const bars = (rows, name, val, suf) => rows.map(r => `<div class="hb"><span>${esc(r[name])}</span><div class="meter"><i style="width:${r[val]}%"></i></div><b>${r[val]}${suf}</b></div>`).join("");
-    const cmp = m.comparison.map(c => ({...c, acc: c.acc}));
-    $("#model").innerHTML = `<h2>The trained model behind the advice</h2>
+function healthBody(){
+  const body = {
+    district: $("#district").value,
+
+    // Manual crop name has priority.
+    health_crop:
+      $("#health_crop").value.trim() ||
+      $("#crop").value.trim(),
+
+    crop:
+      $("#health_crop").value.trim() ||
+      $("#crop").value.trim(),
+
+    disease: $("#disease").value.trim(),
+    symptoms: $("#symptoms").value.trim(),
+    growth_stage: $("#growth_stage").value,
+    language: $("#language").value
+  };
+
+  const context = {};
+
+  F.forEach(field => {
+    const value = $("#" + field.k).value.trim();
+
+    if(value){
+      context[field.k] = value;
+      body[field.k] = value;
+    }
+  });
+
+  // The app.py route from the previous implementation can pass
+  // these values to crop_health.py as context.
+  body.context = context;
+
+  return body;
+}
+
+
+function renderHealth(advice){
+  const a = advice || {};
+
+  return `
+    <div class="card health-panel">
+      <h2>🩺 Crop Health Advisor</h2>
+
+      <p>
+        <b>Assessment:</b>
+        <span class="assessment">
+          ${esc(a.diagnosis_status || "Uncertain")}
+        </span>
+      </p>
+
+      <div class="health-grid">
+
+        <section>
+          <h4>🦠 Disease or crop problem</h4>
+          <p>${esc(
+            a.disease_summary ||
+            "No disease summary was returned."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>🔍 Symptoms to check</h4>
+          <p>${esc(
+            a.symptoms_to_check ||
+            "No symptom guidance was returned."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>🧴 Treatment and management</h4>
+          <p>${esc(
+            a.treatment_management ||
+            "No treatment guidance was returned."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>💊 Medicine guidance</h4>
+          <p>${esc(
+            a.medicine_guidance ||
+            "Follow the product label and local expert advice."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>🌱 Cultivation method</h4>
+          <p>${esc(
+            a.cultivation_method ||
+            "No cultivation guidance was returned."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>🛡️ Prevention</h4>
+          <p>${esc(
+            a.prevention ||
+            "No prevention guidance was returned."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>📚 Disease history in selected area</h4>
+          <p>${esc(
+            a.area_disease_history ||
+            "No area-history information was returned."
+          )}</p>
+        </section>
+
+        <section>
+          <h4>👨‍🌾 When to contact an expert</h4>
+          <p>${esc(
+            a.when_to_contact_expert ||
+            "Contact your local KVK or agriculture officer."
+          )}</p>
+        </section>
+
+      </div>
+
+      <div class="card note">
+        <b>⚠️ Safety note</b>
+        <p>${esc(
+          a.safety_note ||
+          "Confirm treatment with a local KVK or agriculture officer before applying chemicals."
+        )}</p>
+      </div>
+    </div>
+  `;
+}
+
+
+async function checkCropHealth(){
+  const body = healthBody();
+
+  if(!body.district){
+    $("#out").innerHTML = `
+      <div class="err">Please select a district.</div>
+    `;
+    return;
+  }
+
+  if(!body.health_crop){
+    $("#out").innerHTML = `
+      <div class="err">
+        Please select or type a crop name.
+      </div>
+    `;
+    return;
+  }
+
+  if(!body.disease &&!body.symptoms){
+    $("#out").innerHTML = `
+      <div class="err">
+        Enter a disease/problem name or describe the symptoms.
+      </div>
+    `;
+    return;
+  }
+
+  $("#out").innerHTML = `
+    <div class="spin"></div>
+    <p class="mute" style="text-align:center">
+      AI is preparing crop-health advice...
+    </p>
+  `;
+
+  try{
+    const response = await fetch(
+      "/api/crop-health",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(body)
+      }
+    );
+
+    const result = await response.json();
+
+    if(!response.ok){
+      throw new Error(
+        result.error ||
+        "Crop-health request failed."
+      );
+    }
+
+    $("#out").innerHTML = renderHealth(
+      result.advice || result
+    );
+
+  }catch(error){
+    $("#out").innerHTML = `
+      <div class="err">${esc(error.message)}</div>
+    `;
+  }
+}
+
+$("#healthBtn").onclick = checkCropHealth;
+
+
+$("#crop").addEventListener("change", () => {
+  if($("#crop").value){
+    $("#health_crop").value = cap($("#crop").value);
+  }
+});
+
+
+function setTheme(theme){
+  document.documentElement.dataset.theme = theme;
+
+  try{
+    localStorage.setItem("theme", theme);
+  }catch(error){}
+}
+
+document.querySelectorAll(".themes button").forEach(button => {
+  button.onclick = () => setTheme(button.dataset.t);
+});
+
+let savedTheme = "monsoon";
+
+try{
+  savedTheme =
+    localStorage.getItem("theme") ||
+    "monsoon";
+}catch(error){}
+
+setTheme(savedTheme);
+
+
+let modelLoaded = false;
+
+async function loadModel(){
+  if(modelLoaded){
+    return;
+  }
+
+  try{
+    const response = await fetch("/api/model");
+    const model = await response.json();
+
+    if(model.error){
+      throw new Error(model.error);
+    }
+
+    const bars = (rows, name, value, suffix) =>
+      (rows || []).map(row => `
+        <div class="hb">
+          <span>${esc(row[name])}</span>
+          <div class="meter">
+            <i style="width:${row[value]}%"></i>
+          </div>
+          <b>${esc(row[value])}${suffix}</b>
+        </div>
+      `).join("");
+
+    $("#model").innerHTML = `
+      <h2>The trained model behind the advice</h2>
+
       <div class="stats">
-        <div class="stat"><b>${m.accuracy ?? "–"}${m.accuracy ? "%" : ""}</b>test accuracy</div>
-        <div class="stat"><b>${m.crops.length}</b>crops</div><div class="stat"><b>${m.features.length}</b>inputs</div>
-        <div class="stat"><b>${m.rows ?? "–"}</b>training rows</div><div class="stat"><b>${m.districts}</b>districts</div>
-        <div class="stat"><b>${m.yield_crops}</b>crops with yield data</div></div>
-      <p class="mute">Active model: <b>${esc(m.name)}</b>. Accuracy is measured on ${m.test_rows ?? "held-out"} test rows the model never saw during training.</p>
-      <h3>Random Forest vs XGBoost</h3>${bars(cmp, "name", "acc", "%")}
-      ${m.importance.length ? `<h3>What drives the prediction</h3>${bars(m.importance.sort((a,b)=>b.value-a.value), "feature", "value", "%")}` : ""}
-      ${m.per_crop.length ? `<h3>Score per crop (F1)</h3>${m.per_crop.map(c => `<span class="tag" style="background:${c.f1 >= .99 ? "#dcefdc" : "#fbe3c4"}">${cap(esc(c.crop))} ${c.f1.toFixed(2)}</span>`).join("")}` : ""}
-      <h3>Yield ranges available for</h3>${Object.entries(m.mapped).map(([k,v]) => `<span class="tag">${cap(esc(k))} → ${esc(v)}</span>`).join("")}
-      <p class="mute" style="font-size:12px">Yield is a typical range (25th–75th percentile) taken from Odisha records, not a model prediction, because the source data mixes units.</p>`;
-    loaded = true;
-  } catch (e) { $("#model").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+        <div class="stat">
+          <b>${model.accuracy?? "–"}${model.accuracy? "%": ""}</b>
+          test accuracy
+        </div>
+
+        <div class="stat">
+          <b>${model.crops?.length?? "–"}</b>
+          crops
+        </div>
+
+        <div class="stat">
+          <b>${model.features?.length?? "–"}</b>
+          inputs
+        </div>
+
+        <div class="stat">
+          <b>${model.rows?? "–"}</b>
+          training rows
+        </div>
+
+        <div class="stat">
+          <b>${model.districts?? "–"}</b>
+          districts
+        </div>
+
+        <div class="stat">
+          <b>${model.yield_crops?? "–"}</b>
+          yield crops
+        </div>
+      </div>
+
+      <p class="mute">
+        Active model:
+        <b>${esc(model.name || "Unknown")}</b>
+      </p>
+
+      <h3>Model comparison</h3>
+      ${bars(model.comparison, "name", "acc", "%")}
+
+      ${
+        model.importance?.length
+? `
+            <h3>What drives the prediction</h3>
+            ${bars(model.importance, "feature", "value", "%")}
+          `
+: ""
+      }
+
+      ${
+        model.per_crop?.length
+? `
+            <h3>Score per crop</h3>
+            ${model.per_crop.map(item => `
+              <span class="tag">
+                ${cap(esc(item.crop))} ${esc(item.f1)}
+              </span>
+            `).join("")}
+          `
+: ""
+      }
+
+      <p class="mute" style="font-size:12px">
+        The crop-health advisor is AI-generated and is separate from the
+        trained crop recommendation model.
+      </p>
+    `;
+
+    modelLoaded = true;
+
+  }catch(error){
+    $("#model").innerHTML = `
+      <div class="err">${esc(error.message)}</div>
+    `;
+  }
 }
 </script>
-{% endraw %}
+
 </body>
 </html>
