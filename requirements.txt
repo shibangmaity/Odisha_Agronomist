@@ -1,8 +1,8 @@
 flask
-pandas
-scikit-learn==YOUR_VERSION
-xgboost
-joblib
+gunicorn
+joblib==1.5.2
+pandas==2.3.3
+numpy==2.3.5
+scikit-learn==1.7.2
 openai
 python-dotenv
-gunicorn
