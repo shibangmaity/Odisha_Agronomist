@@ -6,7 +6,23 @@ A web app that helps Odisha farmers choose a crop. It takes the district, soil n
 2. **Yield forecast** – the typical yield range for that crop and district, taken from Odisha's historical records.
 3. **AI Agronomist action plan** – a sowing schedule, fertilizer management and irrigation strategy written by an LLM, in English, Odia, Hindi, Bengali or Telugu.
 
-**Live app:** _add your Render link here_
+**Live app:** https://odisha-agronomist-mm4j.onrender.com/
+
+_The app runs on Render's free plan, so the first visit after a quiet period can take 30 to 60 seconds to wake up._
+
+## Screenshots
+
+**Advisor** – enter the district, soil and weather values to get crop matches, a yield range and the action plan.
+
+![Advisor tab](screenshots/1no.png)
+
+**Model & Data** – accuracy, Random Forest vs XGBoost, what drives the prediction and score per crop.
+
+![Model and Data tab](screenshots/2no.png)
+
+**About** – how the app works, the data behind it and the team.
+
+![About tab](screenshots/3no.png)
 
 ## Inputs
 
@@ -22,7 +38,7 @@ A web app that helps Odisha farmers choose a crop. It takes the district, soil n
 
 - **Crop classifier:** trained on the Kaggle Crop Recommendation dataset (22 crops). Random Forest scored 99.3% and XGBoost 98.9% on a held-out 20% test split; Random Forest is used. This dataset is synthetic, so treat the accuracy as a demonstration figure, not field accuracy.
 - **Yield ranges:** built from the Indian crop production dataset, filtered to Odisha (29,625 rows, 30 districts, 43 crops). The app shows the 25th to 75th percentile of past yields (tonnes per hectare), not a model prediction.
-- **Action plan:** the crop, soil, weather and yield range are sent to an LLM prompted to act as an Odisha agronomist. Works with Groq, OpenAI or xAI through one client library.
+- **Action plan:** the crop, soil, weather and yield range are sent to an LLM prompted to act as an Odisha agronomist. Uses the xAI Grok API through the OpenAI Python library (Groq or OpenAI keys also work).
 
 ## Data notes and limitations
 
@@ -53,9 +69,8 @@ pip install -r requirements.txt
 Create a file named `.env` next to `app.py` (it is git-ignored) with one of:
 
 ```
-GROQ_API_KEY=your_key
-# or OPENAI_API_KEY=your_key
-# or XAI_API_KEY=your_key
+XAI_API_KEY=your_key
+# GROQ_API_KEY or OPENAI_API_KEY also work
 ```
 
 ```bash
@@ -68,14 +83,22 @@ Open http://127.0.0.1:5000. Without a key, crop matches and yield ranges still w
 
 - Build command: `pip install -r requirements.txt`
 - Start command: `gunicorn app:app --workers 1 --timeout 300`
-- Environment variable: `GROQ_API_KEY` (or the key for your provider)
+- Environment variable: `XAI_API_KEY` (your Grok key)
 
-## Team
+## Team Members
 
-Built as a team project. Contributions go through GitHub.
+| Name |
+|---|
+| Shibang Maity |
+| Priyanshu Sekhar Bhuyan |
+| Roshan Panda |
+| M.Tanisha |
+| Rishav Kumar Shrivastava |
+| Divyansh Singh |
+
+Contributions go through GitHub.
 
 ## Data sources
 
 - Indian crop production yield dataset (Kaggle)
 - Crop Recommendation dataset (Kaggle)
-- 
