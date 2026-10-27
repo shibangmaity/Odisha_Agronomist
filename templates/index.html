@@ -53,6 +53,7 @@ input:focus,select:focus{outline:0;border-color:var(--leaf);box-shadow:0 0 0 3px
 .hb{display:grid;grid-template-columns:120px 1fr 52px;gap:10px;align-items:center;font-size:13px;margin:6px 0}
 .tag{display:inline-block;padding:3px 9px;border-radius:8px;font-size:12px;margin:3px;background:var(--sand)}
 .err{background:#fdece8;color:#8c2f1c;border-radius:12px;padding:12px}
+.info{background:#eaf1f8;color:#22456a;border-radius:12px;padding:12px}
 .empty{text-align:center;color:var(--mute);padding:60px 20px}.empty span{font-size:46px;display:block}
 .spin{width:34px;height:34px;border:4px solid var(--sand);border-top-color:var(--green);border-radius:50%;margin:60px auto;animation:spin .8s linear infinite}
 .hide{display:none}
@@ -107,9 +108,12 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
     <select id="district">{% for d in districts %}<option value="{{ d }}">{{ d.title() }}</option>{% endfor %}</select>
     <label>Season</label>
     <select id="season">{% for s, m in seasons.items() %}<option value="{{ s }}">{{ s }} ({{ m }})</option>{% endfor %}</select>
+    <label>Soil type</label>
+    <select id="soil"><option value="">My own values (soil test)</option>{% for s in soils %}<option value="{{ s.name }}">{{ s.name }}</option>{% endfor %}</select>
     <label>Crop to check (optional)</label>
     <select id="crop"><option value="">Best match (auto)</option>{% for c in crops %}<option value="{{ c }}">{{ c.title() }}</option>{% endfor %}</select>
     <div class="two" id="fields"></div>
+    <p class="mute" id="soilNote" style="font-size:12px;margin:8px 0 0"></p>
     <p class="mute" id="climateNote" style="font-size:12px;margin:8px 0 0"></p>
     <label>Advice language</label>
     <select id="language">{% for l in languages %}<option>{{ l }}</option>{% endfor %}</select>
@@ -152,12 +156,14 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
     <li>Crop scores use soil and weather values only. Your district is used for the yield range and the AI's local advice.</li>
     <li>The model learned from a general, synthetic crop dataset, so treat scores as guidance, not a guarantee. Soil and weather values must be inside the range it was trained on.</li>
     <li>Some crops, like mango and coconut, have no Odisha yield records, so no yield range is shown for them.</li>
+    <li>Crop suggestions are most reliable for Kharif. The training data has no mustard, groundnut, potato, wheat or vegetables, so Rabi and summer suggestions are limited.</li>
+    <li>The soil type fills in the soil's typical pH and shows whether it is usually low or high in nitrogen, phosphorus and potassium (Orissa Review, 2005). A soil test from your Soil Health Card is always better.</li>
     <li>Yield values in the source data mix units, so the app shows a range from the data instead of a prediction.</li>
     <li>Always confirm fertilizer doses with your local Krishi Vigyan Kendra (KVK) before buying inputs.</li></ul></div>
 </div>
 </main>
 
-<script>window.LIMITS = {{ limits|tojson }}; window.CLIMATE = {{ climate|tojson }};</script>
+<script>window.LIMITS = {{ limits|tojson }}; window.CLIMATE = {{ climate|tojson }}; window.SOILS = {{ soils|tojson }};</script>
 {% raw %}
 <script>
 const $ = s => document.querySelector(s);
@@ -191,6 +197,35 @@ function autofill() {
 }
 $("#fields").innerHTML = F.map(f => `<div><label>${f.l}${f.u ? " ("+f.u+")" : ""}</label><input id="${f.k}" type="number" min="${f.min}" max="${f.max}" step="${f.s}" placeholder="${f.min} – ${f.max}"></div>`).join("");
 
+// Soil type: fills the soil's typical pH and shows its N, P, K status (Orissa Review, 2005)
+const SOIL_LIST = window.SOILS || [], SOILS = Object.fromEntries(SOIL_LIST.map(s => [s.name, s]));
+let soilAuto = true;          // follow the district until the user picks a soil type or types their own pH
+function soilLabels() {
+  const dist = $("#district").value;
+  [...$("#soil").options].forEach(o => { if (SOILS[o.value]) o.textContent = o.value +
+    (SOILS[o.value].districts.includes(dist) ? " \u00b7 found in " + cap(dist.toLowerCase()) : ""); });
+}
+function fillSoil() {
+  const name = $("#soil").value, s = SOILS[name];
+  if (!s) { $("#soilNote").textContent = "Enter pH from your soil test. N, P, K = what your field gets in kg/ha (soil test or planned fertilizer)."; return; }
+  $("#ph").value = s.ph;
+  $("#soilNote").textContent = `${name} soil is ${s.reaction}, so pH ${s.ph} is filled in. Nitrogen ${s.status.N}, phosphorus ` +
+    `${s.status.P}, potassium ${s.status.K} (${s.source}), so plan fertilizer for what is low. ` +
+    `Enter N, P, K as what your field gets in kg/ha (soil test or planned fertilizer).`;
+}
+function soilForDistrict() {
+  soilLabels();
+  if (!soilAuto) return;
+  const first = SOIL_LIST.find(s => s.districts.includes($("#district").value));
+  $("#soil").value = first ? first.name : "";
+  fillSoil();
+}
+$("#soil").addEventListener("change", () => { soilAuto = false; fillSoil(); });
+$("#ph").addEventListener("input", () => {
+  soilAuto = false;
+  if ($("#soil").value) { $("#soil").value = ""; $("#soilNote").textContent = "Your own pH value."; }
+});
+
 // Sample values, in the same order as F: N, P, K, pH, temperature, humidity, rainfall
 const SAMPLES = [
   {name:"Rice",     v:[90, 42, 43, 6.5, 21, 82, 200]},
@@ -222,10 +257,13 @@ $("#sample").onclick = () => {
   $("#district").selectedIndex = Math.floor(Math.random() * opts.length);
   $("#crop").value = "";                                       // keep "Best match (auto)"
   $("#climateNote").textContent = "Sample values, not your district's weather. Change the district or season to fill in real averages."
+  soilAuto = false; $("#soil").value = ""; soilLabels(); $("#soilNote").textContent = "Sample soil values."
 };
 // pick the season from today's month, then fill the weather; refill whenever district or season changes
 { const m = new Date().getMonth() + 1; $("#season").value = m >= 6 && m <= 10 ? "Kharif" : m >= 3 && m <= 5 ? "Zaid" : "Rabi"; }
 $("#district").addEventListener("change", autofill);
+$("#district").addEventListener("change", soilForDistrict);
+soilForDistrict();
 $("#season").addEventListener("change", autofill);
 autofill();
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
@@ -253,7 +291,7 @@ function fit(profile, body) {
   return F.map(f => {
     const [lo, mid, hi] = profile[f.k], v = +body[f.k], span = f.max - f.min, pct = x => Math.max(0, Math.min(100, (x - f.min) / span * 100));
     const st = v < lo ? ["below typical", "bad"] : v > hi ? ["above typical", "bad"] : ["in range", "ok"];
-    return `<div class="fit"><span>${f.l.split(" ")[0]}</span><div class="track"><div class="band" style="left:${pct(lo)}%;width:${pct(hi)-pct(lo)}%"></div><div class="pin ${st[1]}" style="left:${pct(v)}%"></div></div><span class="${st[1]}">${st[0]}</span></div>`;
+    return `<div class="fit"><span>${f.l.replace(/ \(.*\)$/, "")}</span><div class="track"><div class="band" style="left:${pct(lo)}%;width:${pct(hi)-pct(lo)}%"></div><div class="pin ${st[1]}" style="left:${pct(v)}%"></div></div><span class="${st[1]}">${st[0]}</span></div>`;
   }).join("");
 }
 
@@ -270,6 +308,7 @@ function render(d, body) {
      <section><h4>💧 Irrigation strategy</h4><p>${esc(p.irrigation_strategy)}</p></section></div>`;
   $("#out").innerHTML = `<h2>Best matches for your soil and weather</h2><div class="chips">${chips}</div>
     ${d.warning ? `<div class="err" style="margin:12px 0">⚠️ ${esc(d.warning)}</div>` : ""}
+    ${d.season_note ? `<div class="info" style="margin:12px 0">ℹ️ ${esc(d.season_note)}</div>` : ""}
     <div class="row"><b>${cap(esc(d.chosen))}</b><span>model match score</span></div>
     <div class="big">${Math.round(d.chosen_score*100)}%</div><div class="meter"><i style="width:${d.chosen_score*100}%"></i></div>
     ${d.profile ? `<h3>Your field vs what ${esc(d.chosen)} usually needs</h3>${fit(d.profile, body)}<p class="mute" style="font-size:12px">Green band = typical range in the training data.</p>` : ""}

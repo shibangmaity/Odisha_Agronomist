@@ -30,6 +30,7 @@ _The app runs on Render's free plan, so the first visit after a quiet period can
 |---|---|
 | District | Any of Odisha's 30 districts in the yield records |
 | Soil nutrients | Nitrogen, phosphorus, potassium (kg/ha) and soil pH |
+| Soil type | One of Odisha's 8 soil groups (defaults to the main soil of the district); fills the typical pH and shows the soil's N, P, K status |
 | Season | Kharif (Jun–Oct), Rabi (Nov–Feb) or Zaid (Mar–May) |
 | Weather | Temperature (°C), humidity (%), rainfall (mm per month in the season). Filled in automatically from the district's 2019–2023 averages; can be changed |
 | Language | English, Odia, Hindi, Bengali, Telugu |
@@ -48,6 +49,8 @@ _The app runs on Render's free plan, so the first visit after a quiet period can
 - About half of the yield values in the source data are recorded in a different unit (for example rice at 150+ t/ha), and all rows from 2016 onward are affected. A yield prediction model trained on this data performed worse than a plain average, so the app shows a typical range instead. Rows with implausible yields are left out **only when the range is summarised**, never from the dataset.
 - The crop dataset has no district column, so the district affects the yield range and the AI advice, not the crop score.
 - 13 of the 22 crops (for example apple, mango, banana) have no Odisha yield records; the app shows suitability only for them. Crops with few records (for example cotton) are flagged as low confidence.
+- Crop suggestions are most reliable for Kharif. The crop dataset has no mustard, groundnut, potato, wheat or vegetables, so Rabi and Zaid suggestions are limited; the app says so with each Rabi or Zaid result.
+- Soil type: districts, pH and N/P/K status (low / medium / high) come from "Soil of Orissa and Its Management", Orissa Review (Govt. of Odisha), Nov 2005. Only pH is filled in. N/P/K status is shown as text, because the crop dataset's N/P/K behave like the nutrients a field receives (rice rows have a median of 80:47:40, close to a fertilizer dose), not the soil's own status: filling "low" status values made the model suggest coconut for most Kharif fields.
 - Advice is guidance only. Confirm doses and dates with the local Krishi Vigyan Kendra.
 
 ## Project structure
@@ -124,3 +127,5 @@ Contributions go through GitHub.
 
 - Indian crop production yield dataset (Kaggle)
 - Crop Recommendation dataset (Kaggle)
+- Soil of Orissa and Its Management, Orissa Review, Government of Odisha, November 2005
+- Open-Meteo historical weather API (ERA5 reanalysis), 2019–2023
