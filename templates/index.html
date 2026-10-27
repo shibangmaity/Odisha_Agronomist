@@ -125,14 +125,14 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
   <h2 class="sec">What happens when you tap “Get advice”</h2>
   <div class="steps">
     <div class="step"><div class="n">1</div><h4>You describe your field</h4><p>Pick your district and enter nitrogen, phosphorus, potassium, pH, temperature, humidity and rainfall. Optionally choose a crop you already have in mind.</p></div>
-    <div class="step"><div class="n">2</div><h4>The ML model scores 22 crops</h4><p>A trained classifier compares your numbers with what each crop usually needs and gives every crop a suitability score. It reaches about 99% accuracy on test data it never saw.</p></div>
+    <div class="step"><div class="n">2</div><h4>The ML model scores 22 crops</h4><p>A trained classifier compares your numbers with what each crop usually needs and gives every crop a match score. It scores about 99% on held-out rows of its (synthetic) training data; if no crop matches well, the app says so.</p></div>
     <div class="step"><div class="n">3</div><h4>Odisha's yield records are checked</h4><p>For crops with local data, you see the typical yield range from historical Odisha records: your district if there is enough data, otherwise all of Odisha.</p></div>
     <div class="step"><div class="n">4</div><h4>An AI agronomist writes your plan</h4><p>A large language model turns your numbers, the chosen crop and the yield range into a sowing, fertilizer and irrigation plan in English, Odia, Hindi, Bengali or Telugu.</p></div>
   </div>
 
   <h2 class="sec">What you get</h2>
   <div class="steps">
-    <div class="step"><div class="em">🎯</div><h4>Top 3 crop matches</h4><p>Ranked by suitability. Tap any one to get advice for that crop.</p></div>
+    <div class="step"><div class="em">🎯</div><h4>Top 3 crop matches</h4><p>Ranked by model match score. Tap any one to get advice for that crop.</p></div>
     <div class="step"><div class="em">📏</div><h4>Field-fit check</h4><p>See which of your inputs sit inside, below or above the crop's usual range.</p></div>
     <div class="step"><div class="em">📊</div><h4>Typical yield</h4><p>Low, typical and high yield with the number of records behind it.</p></div>
     <div class="step"><div class="em">🗓️</div><h4>Action plan</h4><p>When to sow, how to feed the soil and how to water, in your language.</p></div>
@@ -147,25 +147,28 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
 
   <div class="card note"><h2>Good to know</h2><ul>
     <li>Crop scores use soil and weather values only. Your district is used for the yield range and the AI's local advice.</li>
-    <li>The model learned from a general crop dataset, so treat scores as guidance, not a guarantee.</li>
+    <li>The model learned from a general, synthetic crop dataset, so treat scores as guidance, not a guarantee. Soil and weather values must be inside the range it was trained on.</li>
     <li>Some crops, like mango and coconut, have no Odisha yield records, so no yield range is shown for them.</li>
     <li>Yield values in the source data mix units, so the app shows a range from the data instead of a prediction.</li>
     <li>Always confirm fertilizer doses with your local Krishi Vigyan Kendra (KVK) before buying inputs.</li></ul></div>
 </div>
 </main>
 
+<script>window.LIMITS = {{ limits|tojson }};</script>
 {% raw %}
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+// min/max come from app.py (the range the model was trained on)
+const LIM = window.LIMITS || {};
 const F = [
-  {k:"N", l:"Nitrogen (N)", u:"kg/ha", min:0, max:300, s:1}, {k:"P", l:"Phosphorus (P)", u:"kg/ha", min:0, max:300, s:1},
-  {k:"K", l:"Potassium (K)", u:"kg/ha", min:0, max:300, s:1}, {k:"ph", l:"Soil pH", u:"", min:3, max:10, s:.1},
-  {k:"temperature", l:"Temperature", u:"°C", min:0, max:50, s:.1}, {k:"humidity", l:"Humidity", u:"%", min:0, max:100, s:1},
-  {k:"rainfall", l:"Rainfall", u:"mm", min:0, max:500, s:1}];
+  {k:"N", l:"Nitrogen (N)", u:"kg/ha", s:1}, {k:"P", l:"Phosphorus (P)", u:"kg/ha", s:1},
+  {k:"K", l:"Potassium (K)", u:"kg/ha", s:1}, {k:"ph", l:"Soil pH", u:"", s:.1},
+  {k:"temperature", l:"Temperature", u:"°C", s:.1}, {k:"humidity", l:"Humidity", u:"%", s:1},
+  {k:"rainfall", l:"Rainfall", u:"mm", s:1}].map(f => ({...f, min: (LIM[f.k] || [0, 1000])[0], max: (LIM[f.k] || [0, 1000])[1]}));
 const L = Object.fromEntries(F.map(f => [f.k, f]));
-$("#fields").innerHTML = F.map(f => `<div><label>${f.l}${f.u ? " ("+f.u+")" : ""}</label><input id="${f.k}" type="number" min="${f.min}" max="${f.max}" step="${f.s}"></div>`).join("");
+$("#fields").innerHTML = F.map(f => `<div><label>${f.l}${f.u ? " ("+f.u+")" : ""}</label><input id="${f.k}" type="number" min="${f.min}" max="${f.max}" step="${f.s}" placeholder="${f.min} – ${f.max}"></div>`).join("");
 
 // Sample values, in the same order as F: N, P, K, pH, temperature, humidity, rainfall
 const SAMPLES = [
@@ -239,7 +242,8 @@ function render(d, body) {
      <section><h4>🧪 Fertilizer management</h4><p>${esc(p.fertilizer_management)}</p></section>
      <section><h4>💧 Irrigation strategy</h4><p>${esc(p.irrigation_strategy)}</p></section></div>`;
   $("#out").innerHTML = `<h2>Best matches for your soil and weather</h2><div class="chips">${chips}</div>
-    <div class="row"><b>${cap(esc(d.chosen))}</b><span>suitability</span></div>
+    ${d.warning ? `<div class="err" style="margin:12px 0">⚠️ ${esc(d.warning)}</div>` : ""}
+    <div class="row"><b>${cap(esc(d.chosen))}</b><span>model match score</span></div>
     <div class="big">${Math.round(d.chosen_score*100)}%</div><div class="meter"><i style="width:${d.chosen_score*100}%"></i></div>
     ${d.profile ? `<h3>Your field vs what ${esc(d.chosen)} usually needs</h3>${fit(d.profile, body)}<p class="mute" style="font-size:12px">Green band = typical range in the training data.</p>` : ""}
     <h3>Typical yield</h3>${yhtml}<h3>Action plan</h3>${advice}`;
@@ -261,11 +265,13 @@ async function loadModel() {
     $("#model").innerHTML = `<h2>The trained model behind the advice</h2>
       <div class="stats">
         <div class="stat"><b>${m.accuracy ?? "–"}${m.accuracy ? "%" : ""}</b>test accuracy</div>
+        ${m.cv_accuracy ? `<div class="stat"><b>${m.cv_accuracy}%</b>5-fold CV (± ${m.cv_std})</div>` : ""}
         <div class="stat"><b>${m.crops.length}</b>crops</div><div class="stat"><b>${m.features.length}</b>inputs</div>
         <div class="stat"><b>${m.rows ?? "–"}</b>training rows</div><div class="stat"><b>${m.districts}</b>districts</div>
         <div class="stat"><b>${m.yield_crops}</b>crops with yield data</div></div>
       <p class="mute">Active model: <b>${esc(m.name)}</b>. Accuracy is measured on ${m.test_rows ?? "held-out"} test rows the model never saw during training.</p>
-      <h3>Random Forest vs XGBoost</h3>${bars(cmp, "name", "acc", "%")}
+      <div class="card note"><b>How to read the 99%.</b> The training data is the Kaggle Crop Recommendation dataset, which is synthetic: 100 generated rows per crop, each crop in its own narrow range. ${m.baseline_tree_cv ? `Even a single decision tree scores ${m.baseline_tree_cv}%, so` : "So"} the high score shows how easy this dataset is, not how well the model works on real Odisha fields. Inputs are limited to the range seen in training, and a top score under ${Math.round((m.low_confidence ?? .4) * 100)}% is shown as “no strong match”.${m.excluded && m.excluded.length ? ` Not recommended for Odisha: ${m.excluded.map(c => cap(esc(c))).join(", ")}.` : ""}</div>
+      <h3>Random Forest vs XGBoost (held-out accuracy)</h3>${bars(cmp, "name", "acc", "%")}
       ${m.importance.length ? `<h3>What drives the prediction</h3>${bars(m.importance.sort((a,b)=>b.value-a.value), "feature", "value", "%")}` : ""}
       ${m.per_crop.length ? `<h3>Score per crop (F1)</h3>${m.per_crop.map(c => `<span class="tag" style="background:${c.f1 >= .99 ? "#dcefdc" : "#fbe3c4"}">${cap(esc(c.crop))} ${c.f1.toFixed(2)}</span>`).join("")}` : ""}
       <h3>Yield ranges available for</h3>${Object.entries(m.mapped).map(([k,v]) => `<span class="tag">${cap(esc(k))} → ${esc(v)}</span>`).join("")}

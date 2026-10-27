@@ -1,0 +1,6 @@
+# only needed to run the training notebook, not the app
+-r requirements.txt
+xgboost
+matplotlib
+ipykernel
+nbconvert
