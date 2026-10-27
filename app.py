@@ -86,6 +86,51 @@ if rec_df is not None:
 
 # typical weather per district and season, built once by build_district_climate.py (Open-Meteo, ERA5)
 SEASONS = {"Kharif": "Jun-Oct", "Rabi": "Nov-Feb", "Zaid": "Mar-May"}
+
+# Soil types of Odisha. Districts, reaction and N/P/K status follow "Soil of Orissa and Its Management",
+# Orissa Review (Govt. of Odisha), Nov 2005. Only pH is filled in: the N/P/K status of a soil is shown as text,
+# because the model's N/P/K behave like the nutrients a field receives (rice rows have a median of 80:47:40,
+# close to a fertilizer dose), not the soil's own status. Filling "low" values made the model suggest coconut.
+SOIL_SOURCE = "Soil of Orissa and Its Management, Orissa Review, Nov 2005"
+_NS = ("medium", "not stated")
+SOIL_TYPES = [   # order decides the default soil for a district (first type found there)
+    {"name": "Deltaic alluvial", "ph": 6.3, "reaction": "acidic to neutral",
+     "N": _NS, "P": _NS, "K": _NS,
+     "districts": ["BALESHWAR", "BHADRAK", "JAJAPUR", "KENDRAPARA", "JAGATSINGHAPUR", "CUTTACK", "PURI", "GAJAPATI", "GANJAM"]},
+    {"name": "Red", "ph": 5.3, "reaction": "strongly to moderately acidic",
+     "N": ("low", "low"), "P": ("low", "low"), "K": _NS,
+     "districts": ["KORAPUT", "RAYAGADA", "NABARANGPUR", "MALKANGIRI", "KENDUJHAR", "GANJAM", "KALAHANDI", "NUAPADA",
+                   "BALANGIR", "DHENKANAL", "MAYURBHANJ"]},
+    {"name": "Red and yellow", "ph": 5.8, "reaction": "moderately acidic (uplands) to slightly acidic (lowlands)",
+     "N": ("low", "low (uplands)"), "P": ("low", "low (uplands), medium (lowlands)"), "K": ("medium", "high in lowlands, uplands not stated"),
+     "districts": ["SAMBALPUR", "BARGARH", "DEOGARH", "SUNDARGARH", "JHARSUGUDA"]},   # Jharsuguda: formerly part of Sambalpur
+    {"name": "Laterite", "ph": 5.2, "reaction": "pH 4.5 to 5.8",
+     "N": ("low", "low"), "P": ("low", "low"), "K": ("medium", "medium"),
+     "districts": ["PURI", "KHORDHA", "NAYAGARH", "CUTTACK", "DHENKANAL", "KENDUJHAR", "MAYURBHANJ", "SAMBALPUR"]},
+    {"name": "Coastal saline and alluvial", "ph": 7.0, "reaction": "pH 6.0 to 8.0, saline",
+     "N": ("high", "high"), "P": ("low", "low to medium"), "K": ("high", "high"),
+     "districts": ["BALESHWAR", "BHADRAK", "JAGATSINGHAPUR", "KENDRAPARA", "PURI", "KHORDHA", "GANJAM"]},
+    {"name": "Black", "ph": 7.8, "reaction": "neutral to alkaline",
+     "N": _NS, "P": ("low", "low"), "K": ("low", "low"),
+     "districts": ["PURI", "GANJAM", "MALKANGIRI", "KALAHANDI", "NUAPADA", "BALANGIR", "SONEPUR", "BOUDH", "SAMBALPUR",
+                   "BARGARH", "ANUGUL"]},
+    {"name": "Mixed red and black", "ph": 7.0, "reaction": "neutral",
+     "N": _NS, "P": _NS, "K": _NS,
+     "districts": ["SAMBALPUR", "BARGARH", "SONEPUR", "BALANGIR"]},
+    {"name": "Brown forest", "ph": 5.5, "reaction": "acidic",
+     "N": ("high", "medium to high"), "P": ("medium", "medium"), "K": ("medium", "medium"),
+     "districts": ["KANDHAMAL", "RAYAGADA", "GANJAM", "NAYAGARH"]},
+]
+SOILS = [{"name": s["name"], "ph": s["ph"], "reaction": s["reaction"], "districts": s["districts"],
+          "status": {f: s[f][1] for f in ("N", "P", "K")}, "source": SOIL_SOURCE} for s in SOIL_TYPES]
+
+# crop suggestions outside Kharif are weak: the training data lacks Odisha's main winter and summer crops
+SEASON_NOTES = {
+    "Rabi": "Rabi suggestions are limited. The model's training data has no mustard, groundnut, potato, wheat or winter "
+            "vegetables, so the matches below may not suit your field. Check them against your local KVK's Rabi advice.",
+    "Zaid": "Summer (Zaid) suggestions are limited. The model's training data has no groundnut, sesame or summer vegetables, "
+            "so the matches below may not suit your field. Check them against your local KVK's advice.",
+}
 CLIMATE_CSV = os.path.join(BASE, "data", "processed", "district_climate.csv")
 CLIMATE = {}
 if os.path.exists(CLIMATE_CSV):
@@ -232,6 +277,7 @@ Weather: temperature {d['temperature']} C, humidity {d['humidity']} %, average r
 Give practical, specific advice for Odisha and the district's soil type.
 Reply ONLY as JSON with exactly these keys: "sowing_schedule", "fertilizer_management", "irrigation_strategy".
 Each value is short plain text (3-5 sentences or short lines). Base fertilizer advice on the N, P, K and pH given.
+If {crop_label} is not usually grown in this season in Odisha, say so first and name crops that are.
 Write all values in {language}. Add that doses should be confirmed with the local Krishi Vigyan Kendra."""
     try:
         plan = call_ai(prompt)
@@ -253,7 +299,7 @@ Write all values in {language}. Add that doses should be confirmed with the loca
 @app.get("/")
 def index():
     return render_template("index.html", districts=yield_stats["districts"], crops=CROPS, languages=LANGUAGES,
-                           limits=LIMITS, seasons=SEASONS, climate=CLIMATE)
+                           limits=LIMITS, seasons=SEASONS, climate=CLIMATE, soils=SOILS)
 
 
 @app.post("/api/recommend")
@@ -286,7 +332,8 @@ def recommend():
     season = d.get("season") if d.get("season") in SEASONS else None
     plan = agronomist_plan({**vals, "district": d["district"], "season": season}, chosen, lang, y)
     return jsonify(top=top, chosen=chosen, chosen_score=round(float(proba[chosen]), 3), yield_info=y, plan=plan,
-                   profile=PROFILE.get(chosen), low_confidence=low_conf, warning=warning, season=season)
+                   profile=PROFILE.get(chosen), low_confidence=low_conf, warning=warning, season=season,
+                   season_note=SEASON_NOTES.get(season))
 
 
 @app.get("/api/model")
