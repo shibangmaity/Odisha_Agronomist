@@ -30,7 +30,8 @@ _The app runs on Render's free plan, so the first visit after a quiet period can
 |---|---|
 | District | Any of Odisha's 30 districts in the yield records |
 | Soil nutrients | Nitrogen, phosphorus, potassium (kg/ha) and soil pH |
-| Weather | Temperature (°C), humidity (%), rainfall (mm) |
+| Season | Kharif (Jun–Oct), Rabi (Nov–Feb) or Zaid (Mar–May) |
+| Weather | Temperature (°C), humidity (%), rainfall (mm per month in the season). Filled in automatically from the district's 2019–2023 averages; can be changed |
 | Language | English, Odia, Hindi, Bengali, Telugu |
 | Crop to check (optional) | See the suitability of a specific crop |
 
@@ -58,6 +59,7 @@ models/crop_model.pkl          Random Forest crop classifier
 models/yield_stats.pkl         Yield ranges per crop and district
 data/processed/                Odisha yield data and crop recommendation data
 odisha_crop_advisory_v5.ipynb  Notebook that builds the two .pkl files
+build_district_climate.py      Builds data/processed/district_climate.csv (typical weather per district and season)
 requirements.txt
 ```
 
@@ -79,6 +81,16 @@ python app.py
 ```
 
 Open http://127.0.0.1:5000. Without a key, crop matches and yield ranges still work; only the action plan needs it.
+
+## District weather table
+
+`data/processed/district_climate.csv` holds the typical temperature, humidity and monthly rainfall for each district headquarters and season (2019–2023, Open-Meteo historical API, ERA5 reanalysis). It is built once and committed, so the app makes no weather calls at runtime:
+
+```bash
+python build_district_climate.py
+```
+
+Downloads are cached in `data/raw/climate_cache/` (git-ignored). Without the CSV the app still works; weather is then entered by hand.
 
 ## Deploy on Render
 

@@ -105,9 +105,12 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
     <h2>Your field</h2>
     <label>District</label>
     <select id="district">{% for d in districts %}<option value="{{ d }}">{{ d.title() }}</option>{% endfor %}</select>
+    <label>Season</label>
+    <select id="season">{% for s, m in seasons.items() %}<option value="{{ s }}">{{ s }} ({{ m }})</option>{% endfor %}</select>
     <label>Crop to check (optional)</label>
     <select id="crop"><option value="">Best match (auto)</option>{% for c in crops %}<option value="{{ c }}">{{ c.title() }}</option>{% endfor %}</select>
     <div class="two" id="fields"></div>
+    <p class="mute" id="climateNote" style="font-size:12px;margin:8px 0 0"></p>
     <label>Advice language</label>
     <select id="language">{% for l in languages %}<option>{{ l }}</option>{% endfor %}</select>
     <button class="btn" id="go">Get advice</button>
@@ -124,7 +127,7 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
 
   <h2 class="sec">What happens when you tap “Get advice”</h2>
   <div class="steps">
-    <div class="step"><div class="n">1</div><h4>You describe your field</h4><p>Pick your district and enter nitrogen, phosphorus, potassium, pH, temperature, humidity and rainfall. Optionally choose a crop you already have in mind.</p></div>
+    <div class="step"><div class="n">1</div><h4>You describe your field</h4><p>Pick your district and season; the typical temperature, humidity and rainfall there are filled in for you. Enter nitrogen, phosphorus, potassium and pH. Optionally choose a crop you already have in mind.</p></div>
     <div class="step"><div class="n">2</div><h4>The ML model scores 22 crops</h4><p>A trained classifier compares your numbers with what each crop usually needs and gives every crop a match score. It scores about 99% on held-out rows of its (synthetic) training data; if no crop matches well, the app says so.</p></div>
     <div class="step"><div class="n">3</div><h4>Odisha's yield records are checked</h4><p>For crops with local data, you see the typical yield range from historical Odisha records: your district if there is enough data, otherwise all of Odisha.</p></div>
     <div class="step"><div class="n">4</div><h4>An AI agronomist writes your plan</h4><p>A large language model turns your numbers, the chosen crop and the yield range into a sowing, fertilizer and irrigation plan in English, Odia, Hindi, Bengali or Telugu.</p></div>
@@ -154,7 +157,7 @@ header{background:rgba(255,253,247,.88);backdrop-filter:blur(8px)}
 </div>
 </main>
 
-<script>window.LIMITS = {{ limits|tojson }};</script>
+<script>window.LIMITS = {{ limits|tojson }}; window.CLIMATE = {{ climate|tojson }};</script>
 {% raw %}
 <script>
 const $ = s => document.querySelector(s);
@@ -166,8 +169,26 @@ const F = [
   {k:"N", l:"Nitrogen (N)", u:"kg/ha", s:1}, {k:"P", l:"Phosphorus (P)", u:"kg/ha", s:1},
   {k:"K", l:"Potassium (K)", u:"kg/ha", s:1}, {k:"ph", l:"Soil pH", u:"", s:.1},
   {k:"temperature", l:"Temperature", u:"°C", s:.1}, {k:"humidity", l:"Humidity", u:"%", s:1},
-  {k:"rainfall", l:"Rainfall", u:"mm", s:1}].map(f => ({...f, min: (LIM[f.k] || [0, 1000])[0], max: (LIM[f.k] || [0, 1000])[1]}));
+  {k:"rainfall", l:"Rainfall", u:"mm/month", s:1}].map(f => ({...f, min: (LIM[f.k] || [0, 1000])[0], max: (LIM[f.k] || [0, 1000])[1]}));
 const L = Object.fromEntries(F.map(f => [f.k, f]));
+// Typical weather for the chosen district and season (built by build_district_climate.py)
+const CLIMATE = window.CLIMATE || {};
+function autofill() {
+  const dist = $("#district").value, season = $("#season").value, c = (CLIMATE[dist] || {})[season];
+  if (!c) { $("#climateNote").textContent = "Rainfall = average rainfall per month during the growing season."; return; }
+  const notes = [];
+  ["temperature", "humidity", "rainfall"].forEach(k => {
+    const f = L[k]; let v = c[k];
+    if (v < f.min || v > f.max) {
+      const used = v < f.min ? f.min : f.max;
+      notes.push(`${f.l} here is usually ${v} ${f.u}, outside the range the model was trained on, so ${used} is used.`);
+      v = used;
+    }
+    $("#" + k).value = Math.round(v * 10) / 10;      // one decimal, so 20.2 stays 20.2
+  });
+  $("#climateNote").textContent = `Weather filled in from ${c.years} averages for ${cap(dist.toLowerCase())}, ${season} season ` +
+    `(rainfall = mm per month). Change it if your field is different. ` + notes.join(" ");
+}
 $("#fields").innerHTML = F.map(f => `<div><label>${f.l}${f.u ? " ("+f.u+")" : ""}</label><input id="${f.k}" type="number" min="${f.min}" max="${f.max}" step="${f.s}" placeholder="${f.min} – ${f.max}"></div>`).join("");
 
 // Sample values, in the same order as F: N, P, K, pH, temperature, humidity, rainfall
@@ -200,7 +221,13 @@ $("#sample").onclick = () => {
   const opts = $("#district").options;
   $("#district").selectedIndex = Math.floor(Math.random() * opts.length);
   $("#crop").value = "";                                       // keep "Best match (auto)"
+  $("#climateNote").textContent = "Sample values, not your district's weather. Change the district or season to fill in real averages."
 };
+// pick the season from today's month, then fill the weather; refill whenever district or season changes
+{ const m = new Date().getMonth() + 1; $("#season").value = m >= 6 && m <= 10 ? "Kharif" : m >= 3 && m <= 5 ? "Zaid" : "Rabi"; }
+$("#district").addEventListener("change", autofill);
+$("#season").addEventListener("change", autofill);
+autofill();
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
   $("#advisor").classList.toggle("hide", b.dataset.tab !== "advisor");
@@ -210,7 +237,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
 });
 
 async function run(crop) {
-  const body = {district: $("#district").value, crop: crop ?? $("#crop").value, language: $("#language").value};
+  const body = {district: $("#district").value, season: $("#season").value, crop: crop ?? $("#crop").value, language: $("#language").value};
   F.forEach(f => body[f.k] = $("#"+f.k).value);
   $("#out").innerHTML = '<div class="spin"></div>';
   try {
