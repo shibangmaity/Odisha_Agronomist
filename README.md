@@ -36,9 +36,10 @@ _The app runs on Render's free plan, so the first visit after a quiet period can
 
 ## How it works
 
-- **Crop classifier:** trained on the Kaggle Crop Recommendation dataset (22 crops). Random Forest scored 99.3% and XGBoost 98.9% on a held-out 20% test split; Random Forest is used. This dataset is synthetic, so treat the accuracy as a demonstration figure, not field accuracy.
+- **Crop classifier:** trained on the Kaggle Crop Recommendation dataset (22 crops). Random Forest scored 99.3% and XGBoost 98.9% on a held-out 20% test split (5-fold cross-validation gives the same picture); Random Forest is used. This dataset is synthetic and very easy (a single decision tree also scores about 99%), so treat the accuracy as a demonstration figure, not field accuracy.
 - **Yield ranges:** built from the Indian crop production dataset, filtered to Odisha (29,625 rows, 30 districts, 43 crops). The app shows the 25th to 75th percentile of past yields (tonnes per hectare), not a model prediction.
-- **Action plan:** the crop, soil, weather and yield range are sent to an LLM prompted to act as an Odisha agronomist. Uses the xAI Grok API through the OpenAI Python library (Groq or OpenAI keys also work).
+- **Action plan:** the crop, soil, weather and yield range are sent to an LLM prompted to act as an Odisha agronomist, through the OpenAI Python library. Groq is used if `GROQ_API_KEY` is set, otherwise xAI (`XAI_API_KEY`), otherwise OpenAI (`OPENAI_API_KEY`). Answers are cached and limited to 6 AI calls per visitor per minute (`AI_CALLS_PER_MINUTE`).
+- **Guard rails:** inputs are only accepted inside the range the model was trained on, crops not grown in Odisha (apple, grapes; change with `EXCLUDED_CROPS`) are never recommended, and a top score under 40% is shown as "no strong match".
 
 ## Data notes and limitations
 
@@ -69,8 +70,8 @@ pip install -r requirements.txt
 Create a file named `.env` next to `app.py` (it is git-ignored) with one of:
 
 ```
-XAI_API_KEY=your_key
-# GROQ_API_KEY or OPENAI_API_KEY also work
+GROQ_API_KEY=your_key
+# XAI_API_KEY or OPENAI_API_KEY also work
 ```
 
 ```bash
@@ -83,7 +84,16 @@ Open http://127.0.0.1:5000. Without a key, crop matches and yield ranges still w
 
 - Build command: `pip install -r requirements.txt`
 - Start command: `gunicorn app:app --workers 1 --timeout 300`
-- Environment variable: `XAI_API_KEY` (your Grok key)
+- Environment variable: `GROQ_API_KEY` (or `XAI_API_KEY` / `OPENAI_API_KEY`)
+
+## Retrain the models
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+jupyter nbconvert --to notebook --execute --inplace odisha_crop_advisory_v5.ipynb
+```
+
+This rebuilds both `.pkl` files. Train with the same scikit-learn version as `requirements.txt`, because the app loads the model with that version.
 
 ## Team Members
 
