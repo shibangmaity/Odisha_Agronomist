@@ -84,6 +84,18 @@ if rec_df is not None:
     PROFILE = {c: {f: [round(float(lo.loc[c, f]), 1), round(float(mid.loc[c, f]), 1), round(float(hi.loc[c, f]), 1)]
                    for f in FEATURES} for c in mid.index}
 
+# typical weather per district and season, built once by build_district_climate.py (Open-Meteo, ERA5)
+SEASONS = {"Kharif": "Jun-Oct", "Rabi": "Nov-Feb", "Zaid": "Mar-May"}
+CLIMATE_CSV = os.path.join(BASE, "data", "processed", "district_climate.csv")
+CLIMATE = {}
+if os.path.exists(CLIMATE_CSV):
+    for r in pd.read_csv(CLIMATE_CSV).to_dict("records"):
+        CLIMATE.setdefault(r["district"], {})[r["season"]] = {
+            "temperature": float(r["temperature"]), "humidity": float(r["humidity"]),
+            "rainfall": float(r["rainfall"]), "years": str(r["years"])}
+print(f"[setup] district weather table: {len(CLIMATE)} districts" if CLIMATE else
+      "[setup] district weather table not found (run build_district_climate.py); weather is entered by hand", flush=True)
+
 
 def build_model_info():
     m = crop_bundle["model"]
@@ -92,6 +104,7 @@ def build_model_info():
             "comparison": crop_bundle.get("comparison", [{"name": "Random Forest", "acc": 99.32}, {"name": "XGBoost", "acc": 98.86}]),
             "yield_crops": len(yield_stats["by_crop"]), "districts": len(yield_stats["districts"]),
             "mapped": crop_bundle["label_to_yield_crop"], "limits": LIMITS, "low_confidence": LOW_CONFIDENCE,
+            "climate_districts": len(CLIMATE),
             "trained_with": TRAINED_WITH, "accuracy": None, "cv_accuracy": None, "per_crop": [], "importance": []}
     if hasattr(m, "feature_importances_"):
         info["importance"] = [{"feature": f, "value": round(float(v) * 100, 1)}
@@ -197,7 +210,7 @@ def agronomist_plan(d, crop_label, language, y):
             return {"error": "The 'python-dotenv' package is not installed, so the .env file was not read. Run: python -m pip install python-dotenv   then restart."}
         return {"error": f"No AI key found. Put GROQ_API_KEY=your_key (or XAI_API_KEY / OPENAI_API_KEY) in this file: {ENV_PATH} (file exists: {os.path.exists(ENV_PATH)}), then restart."}
 
-    key = (d["district"], crop_label, language, *(round(float(d[f]), 1) for f in FEATURES))
+    key = (d["district"], d.get("season"), crop_label, language, *(round(float(d[f]), 1) for f in FEATURES))
     with _lock:
         if key in _plan_cache:
             _plan_cache.move_to_end(key)
@@ -207,12 +220,16 @@ def agronomist_plan(d, crop_label, language, y):
 
     yline = (f"Typical yield in past Odisha records: {y['low']}-{y['high']} {y['unit']}." if y["available"]
              else "No Odisha yield records are available for this crop.")
+    season = d.get("season")
+    sline = (f"Growing season: {season} ({SEASONS[season]}). Give advice for this season only."
+             if season else "Cover Odisha's Kharif and Rabi seasons.")
     prompt = f"""You are an expert agronomist for Odisha, India, advising a farmer.
 District: {d['district'].title()}. Recommended crop: {crop_label}.
+{sline}
 Soil (kg/ha): N={d['N']}, P={d['P']}, K={d['K']}, pH={d['ph']}.
-Weather: temperature {d['temperature']} C, humidity {d['humidity']} %, rainfall {d['rainfall']} mm.
+Weather: temperature {d['temperature']} C, humidity {d['humidity']} %, average rainfall {d['rainfall']} mm per month in the season.
 {yline}
-Give practical, specific advice for Odisha's Kharif and Rabi seasons and the district's soil type.
+Give practical, specific advice for Odisha and the district's soil type.
 Reply ONLY as JSON with exactly these keys: "sowing_schedule", "fertilizer_management", "irrigation_strategy".
 Each value is short plain text (3-5 sentences or short lines). Base fertilizer advice on the N, P, K and pH given.
 Write all values in {language}. Add that doses should be confirmed with the local Krishi Vigyan Kendra."""
@@ -236,7 +253,7 @@ Write all values in {language}. Add that doses should be confirmed with the loca
 @app.get("/")
 def index():
     return render_template("index.html", districts=yield_stats["districts"], crops=CROPS, languages=LANGUAGES,
-                           limits=LIMITS)
+                           limits=LIMITS, seasons=SEASONS, climate=CLIMATE)
 
 
 @app.post("/api/recommend")
@@ -266,9 +283,10 @@ def recommend():
     chosen = d.get("crop") if d.get("crop") in proba.index else top[0]["crop"]
     y = yield_info(chosen, d["district"])
     lang = d.get("language") if d.get("language") in LANGUAGES else "English"
-    plan = agronomist_plan({**vals, "district": d["district"]}, chosen, lang, y)
+    season = d.get("season") if d.get("season") in SEASONS else None
+    plan = agronomist_plan({**vals, "district": d["district"], "season": season}, chosen, lang, y)
     return jsonify(top=top, chosen=chosen, chosen_score=round(float(proba[chosen]), 3), yield_info=y, plan=plan,
-                   profile=PROFILE.get(chosen), low_confidence=low_conf, warning=warning)
+                   profile=PROFILE.get(chosen), low_confidence=low_conf, warning=warning, season=season)
 
 
 @app.get("/api/model")
