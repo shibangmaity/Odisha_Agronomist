@@ -1,4 +1,4 @@
-﻿"""Odisha Agronomist: Flask backend.
+"""Odisha Agronomist: Flask backend.
 Run:  put GROQ_API_KEY=<key> in a .env file next to app.py, then: python app.py
       (XAI_API_KEY or OPENAI_API_KEY also work; Groq is used first if several are set)
       (or set it in the terminal: set GROQ_API_KEY=<key> on Windows, export on Mac/Linux)
