@@ -55,6 +55,22 @@ input:focus,select:focus{outline:0;border-color:var(--leaf);box-shadow:0 0 0 3px
 .err{background:#fdece8;color:#8c2f1c;border-radius:12px;padding:12px}
 .empty{text-align:center;color:var(--mute);padding:60px 20px}.empty span{font-size:46px;display:block}
 .spin{width:34px;height:34px;border:4px solid var(--sand);border-top-color:var(--green);border-radius:50%;margin:60px auto;animation:spin .8s linear infinite}
+.plant{text-align:center;padding:34px 10px 40px}.plant svg{width:230px;max-width:80%;display:block;margin:0 auto}
+.plant p{margin:6px 0 0;color:var(--mute);font-weight:500}.plant p::after{content:"";animation:dots 1.4s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.plant .hoe{transform-origin:150px 20px;animation:dig 3.6s ease-in-out infinite}
+@keyframes dig{0%{transform:rotate(30deg)}18%{transform:rotate(-8deg)}26%{transform:rotate(22deg)}34%{transform:rotate(-8deg)}46%,100%{transform:rotate(32deg)}}
+.plant .hole{transform-origin:100px 113px;animation:hole 3.6s ease-in-out infinite}
+@keyframes hole{0%,14%{transform:scale(0)}34%,88%{transform:scale(1)}100%{transform:scale(0)}}
+.plant .sap{transform-origin:100px 114px;animation:sap 3.6s ease-in-out infinite}
+@keyframes sap{0%,44%{opacity:0;transform:translateY(-34px) scale(.35)}50%{opacity:1;transform:translateY(-34px) scale(.35)}60%{transform:translateY(0) scale(.35)}88%{opacity:1;transform:translateY(0) scale(1)}96%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(0) scale(1)}}
+.plant .cover{opacity:0;animation:cover 3.6s ease-in-out infinite}
+@keyframes cover{0%,58%{opacity:0}66%,96%{opacity:1}100%{opacity:0}}
+.plant .pt{animation:puff 3.6s ease-out infinite}
+@keyframes puff{0%,17%{opacity:0;transform:translate(0,0)}19%{opacity:1}28%{opacity:0;transform:translate(var(--dx),-24px)}33%{opacity:0;transform:translate(0,0)}35%{opacity:1}44%,100%{opacity:0;transform:translate(var(--dx),-24px)}}
+.plant .drop{opacity:0;animation:rain 3.6s linear infinite}
+@keyframes rain{0%,70%{opacity:0;transform:translateY(0)}76%{opacity:1}92%{opacity:0;transform:translateY(34px)}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.plant *{animation:none!important}}
 .hide{display:none}
 @media(max-width:820px){.grid{grid-template-columns:1fr}.bar{flex-wrap:wrap}nav{margin-left:0}.fit{grid-template-columns:90px 1fr 90px}}
 :root{--sky:#fff1cc;--ground:#e6f1d8}
@@ -230,10 +246,21 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   if (b.dataset.tab === "model") loadModel();
 });
 
+const LOADER = `<div class="plant"><svg viewBox="0 0 200 150" aria-hidden="true">
+<ellipse cx="100" cy="132" rx="92" ry="14" fill="#7a4e32" opacity=".25"/>
+<path d="M10 128C40 104 70 108 100 108S160 104 190 128V140H10Z" fill="#8b5a3c"/>
+<path d="M10 128C40 104 70 108 100 108S160 104 190 128" fill="none" stroke="#a67349" stroke-width="3" stroke-linecap="round"/>
+<ellipse class="hole" cx="100" cy="113" rx="16" ry="5" fill="#4b2f1d"/>
+<g class="sap"><path d="M100 114V86" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round"/><path d="M100 94C84 94 78 82 80 76C94 76 100 84 100 94Z" fill="var(--leaf)"/><path d="M100 88C116 88 122 76 120 70C106 70 100 78 100 88Z" fill="var(--green)"/></g>
+<path class="cover" d="M82 114C90 106 110 106 118 114C110 118 90 118 82 114Z" fill="#8b5a3c"/>
+<g class="drops" fill="var(--leaf)"><circle class="drop" cx="88" cy="60" r="2.5" style="animation-delay:0s"/><circle class="drop" cx="100" cy="52" r="2.5" style="animation-delay:.15s"/><circle class="drop" cx="112" cy="60" r="2.5" style="animation-delay:.3s"/></g>
+<g fill="#8b5a3c"><circle class="pt" cx="100" cy="108" r="3" style="--dx:-16px"/><circle class="pt" cx="104" cy="108" r="2.4" style="--dx:14px"/><circle class="pt" cx="96" cy="109" r="2" style="--dx:-7px"/><circle class="pt" cx="108" cy="109" r="2.6" style="--dx:22px"/></g>
+<g class="hoe"><line x1="150" y1="20" x2="104" y2="100" stroke="#a0703f" stroke-width="5" stroke-linecap="round"/><path d="M96 96L118 91L123 107L100 112Z" fill="var(--mute)"/></g>
+</svg><p>Planting your crop advice</p></div>`;
 async function run(crop) {
   const body = {district: $("#district").value, crop: crop ?? $("#crop").value, language: $("#language").value};
   F.forEach(f => body[f.k] = $("#"+f.k).value);
-  $("#out").innerHTML = '<div class="spin"></div>';
+  $("#out").innerHTML = LOADER;
   try {
     const r = await fetch("/api/recommend", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
     const d = await r.json();
