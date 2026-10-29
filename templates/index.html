@@ -71,6 +71,9 @@ input:focus,select:focus{outline:0;border-color:var(--leaf);box-shadow:0 0 0 3px
 .plant .drop{opacity:0;animation:rain 3.6s linear infinite}
 @keyframes rain{0%,70%{opacity:0;transform:translateY(0)}76%{opacity:1}92%{opacity:0;transform:translateY(34px)}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.plant *{animation:none!important}}
+.sprout{width:90px;display:block;margin:0 auto 6px}.sprout .grow{transform-origin:50px 62px;animation:grow 3.2s ease-in-out infinite alternate}
+@keyframes grow{from{transform:scale(.72) rotate(-3deg)}to{transform:scale(1) rotate(3deg)}}
+@media(prefers-reduced-motion:reduce){.sprout .grow{animation:none}}
 .hide{display:none}
 @media(max-width:820px){.grid{grid-template-columns:1fr}.bar{flex-wrap:wrap}nav{margin-left:0}.fit{grid-template-columns:90px 1fr 90px}}
 :root{--sky:#fff1cc;--ground:#e6f1d8}
@@ -153,7 +156,7 @@ header{background:
     <button class="btn" id="go">Get advice</button>
     <button class="btn ghost" id="sample" type="button">Try sample values</button>
   </div>
-  <div class="card" id="out"><div class="empty"><span>🌱</span>Enter your soil and weather values, then tap <b>Get advice</b>.</div></div>
+  <div class="card" id="out"><div class="empty"><svg class="sprout" viewBox="0 0 100 80" aria-hidden="true"><path d="M8 72C26 54 74 54 92 72V78H8Z" fill="#8b5a3c"/><path d="M8 72C26 54 74 54 92 72" fill="none" stroke="#a67349" stroke-width="2.5" stroke-linecap="round"/><g class="grow"><path d="M50 62V32" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round"/><path d="M50 42C34 42 28 30 30 24C44 24 50 32 50 42Z" fill="var(--leaf)"/><path d="M50 36C66 36 72 24 70 18C56 18 50 26 50 36Z" fill="var(--green)"/></g></svg>Enter your soil and weather values, then tap <b>Get advice</b>.</div></div>
 </div>
 
 <div id="model" class="card hide"><div class="spin"></div></div>
@@ -261,9 +264,11 @@ async function run(crop) {
   const body = {district: $("#district").value, crop: crop ?? $("#crop").value, language: $("#language").value};
   F.forEach(f => body[f.k] = $("#"+f.k).value);
   $("#out").innerHTML = LOADER;
+  const t0 = Date.now();
   try {
     const r = await fetch("/api/recommend", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
     const d = await r.json();
+    await new Promise(z => setTimeout(z, Math.max(0, 2400 - (Date.now() - t0))));
     if (!r.ok) throw new Error(d.error || "Something went wrong");
     render(d, body);
   } catch (e) { $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
